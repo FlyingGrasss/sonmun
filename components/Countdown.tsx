@@ -34,8 +34,8 @@ const calculateTimeLeft = (): TimeLeft => {
 
 const TimeUnit = ({ value, label, isMounted }: { value: number; label: string; isMounted: boolean }) => (
   <div className="flex flex-col items-center">
-    <div className="bg-white text-[var(--background)] rounded-lg px-6 py-4 min-w-[100px] max-sm:min-w-20 max-sm:px-4 max-sm:py-3 shadow-lg">
-      <span className="text-5xl max-sm:text-4xl font-bold tabular-nums">
+    <div className="flex items-center justify-center bg-white text-[var(--background)] rounded-lg px-6 py-4 min-w-[100px] max-sm:min-w-20 max-sm:px-4 max-sm:py-3 shadow-lg">
+      <span className="text-center text-5xl max-sm:text-4xl font-bold tabular-nums">
         {!isMounted ? "00" : value.toString().padStart(2, "0")}
       </span>
     </div>
