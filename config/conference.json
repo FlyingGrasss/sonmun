@@ -72,7 +72,7 @@
       "enabled": true,
       "title": "Delegation",
       "formTitle": "Delegation Application",
-      "description": "Bring your school to SONMUN and build a delegation ready for three days of debate.",
+      "description": "Bring your school or organization to SONMUN and build a delegation ready for three days of debate.",
       "image": "/applications/delegation.webp"
     },
     {
@@ -80,7 +80,7 @@
       "enabled": true,
       "title": "Press",
       "formTitle": "Press Application",
-      "description": "Report the conference through writing, interviews, photography, and visual storytelling.",
+      "description": "Turn the conference into headlines, report on its most important moments, and give participants a voice through journalism.",
       "image": "/applications/press.webp"
     },
     {
@@ -88,7 +88,7 @@
       "enabled": true,
       "title": "Admin",
       "formTitle": "Admin Application",
-      "description": "Help shape the experience behind the scenes, from logistics to participant support.",
+      "description": "Support the people and processes behind the conference through communication, coordination, and participant care.",
       "image": "/applications/admin.webp"
     }
   ],
