@@ -29,7 +29,7 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Prisma is generated automatically by `postinstall`. Vercel can use `pnpm build`; an explicit `pnpm prisma generate && pnpm build` is also valid.
+Prisma is generated as part of `pnpm build`. After changing `prisma/schema.prisma`, you can regenerate it manually with `pnpm prisma:generate`.
 
 Before deploying, set the database, Resend, Google Sheets, and admin authentication variables in the hosting provider. Never commit `.env.local`.
 

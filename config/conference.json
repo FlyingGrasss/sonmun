@@ -56,7 +56,7 @@
       "enabled": true,
       "title": "Delegate",
       "formTitle": "Delegate Application",
-      "description": "Represent a nation in one of our committees. Research, debate, and draft resolutions on pressing global issues.",
+      "description": "Represent a nation, research global issues, and negotiate thoughtful solutions in committee.",
       "image": "/applications/delegate.webp"
     },
     {
@@ -64,7 +64,7 @@
       "enabled": true,
       "formTitle": "Chair Application",
       "title": "Chairboard",
-      "description": "Lead a committee as Chair or Vice-Chair. Guide debates, manage procedure, and ensure productive sessions.",
+      "description": "Lead a committee, guide procedure, and turn debate into a productive session.",
       "image": "/applications/chair.jpg"
     },
     {
@@ -72,15 +72,15 @@
       "enabled": true,
       "title": "Delegation",
       "formTitle": "Delegation Application",
-      "description": "Apply as a school or organization bringing multiple delegates. Register your institution and manage your group's participation.",
+      "description": "Bring your school to SONMUN and build a delegation ready for three days of debate.",
       "image": "/applications/delegation.webp"
     },
     {
       "id": "press",
       "enabled": true,
-      "title": "Press Corps",
+      "title": "Press",
       "formTitle": "Press Application",
-      "description": "Cover the conference as a journalist. Write reports, conduct interviews, and capture the spirit of SONMUN.",
+      "description": "Report the conference through writing, interviews, photography, and visual storytelling.",
       "image": "/applications/press.webp"
     },
     {
@@ -88,7 +88,7 @@
       "enabled": true,
       "title": "Admin",
       "formTitle": "Admin Application",
-      "description": "Be part of the organizing backbone of SONMUN. Manage logistics, communications, and conference operations.",
+      "description": "Help shape the experience behind the scenes, from logistics to participant support.",
       "image": "/applications/admin.webp"
     }
   ],

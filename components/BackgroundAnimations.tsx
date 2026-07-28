@@ -1,3 +1,5 @@
+import { Leaf } from "lucide-react";
+
 const BackgroundAnimations = () => {
   return (
     <div
@@ -19,6 +21,18 @@ const BackgroundAnimations = () => {
         <span className="sonmun-line sonmun-line-12" />
         <span className="sonmun-line sonmun-line-13" />
         <span className="sonmun-line sonmun-line-14" />
+      </div>
+      <div className="sonmun-leaf-field absolute inset-0">
+        <Leaf className="sonmun-leaf sonmun-leaf-1" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-2" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-3" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-4" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-5" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-6" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-7" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-8" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-9" strokeWidth={1.5} />
+        <Leaf className="sonmun-leaf sonmun-leaf-10" strokeWidth={1.5} />
       </div>
     </div>
   );

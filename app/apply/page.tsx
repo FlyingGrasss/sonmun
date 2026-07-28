@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 
 const APPLICATION_ORDER = ['delegation', 'delegate', 'admin', 'chair', 'press'];
 
-const CARD_TONES: Record<string, 'warm' | 'green'> = {
-  delegation: 'warm',
-  delegate: 'warm',
-  admin: 'green',
-  chair: 'warm',
-  press: 'green',
+const CARD_TONES: Record<string, 'gold' | 'copper' | 'cream' | 'rose'> = {
+  delegation: 'gold',
+  delegate: 'copper',
+  admin: 'cream',
+  chair: 'rose',
+  press: 'gold',
 };
 
 function ApplicationIcon({ type }: { type: string }) {
@@ -33,7 +33,8 @@ function ApplicationIcon({ type }: { type: string }) {
   if (type === 'delegation') {
     return (
       <svg {...commonProps}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h1v11H4zm15 0h1v11h-1zM9 10h1v11H9zm5 0h1v11h-1z" />
+        <circle cx="12" cy="12" r="9" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z" />
       </svg>
     );
   }
@@ -41,7 +42,8 @@ function ApplicationIcon({ type }: { type: string }) {
   if (type === 'delegate') {
     return (
       <svg {...commonProps}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m15 9-2.5 5.5L7 17l2.5-5.5L15 9zM12 3a9 9 0 1 0 9 9" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3a9 9 0 0 1 9 9" />
       </svg>
     );
   }
@@ -49,7 +51,8 @@ function ApplicationIcon({ type }: { type: string }) {
   if (type === 'admin') {
     return (
       <svg {...commonProps}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <rect x="5" y="4" width="14" height="16" rx="2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m8 12 2 2 5-5M8 17h8" />
       </svg>
     );
   }
@@ -57,14 +60,15 @@ function ApplicationIcon({ type }: { type: string }) {
   if (type === 'chair') {
     return (
       <svg {...commonProps}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        <circle cx="12" cy="12" r="8.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
       </svg>
     );
   }
 
   return (
     <svg {...commonProps}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8zM8 8l1.5-3h5L16 8M9 12h6M9 16h3" />
     </svg>
   );
 }
@@ -86,7 +90,7 @@ const Apply = () => {
             <Link
               key={app.id}
               href={`/apply/${app.id}`}
-              className={`sonmun-apply-card sonmun-apply-card--${CARD_TONES[app.id] ?? 'warm'} group`}
+              className={`sonmun-apply-card sonmun-apply-card--${CARD_TONES[app.id] ?? 'gold'} group`}
             >
               <div className="sonmun-apply-card__icon">
                 <ApplicationIcon type={app.id} />
