@@ -4,6 +4,7 @@ import ContentImage from "@/components/ContentImage";
 import RichText from "@/components/RichText";
 import { getPublishedSecretariat, getPublishedSecretariatMember } from "@/lib/content";
 import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
+import { getSiteSettings } from "@/lib/siteSettings";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
@@ -36,6 +37,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 const SecretariatPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
+  const settings = await getSiteSettings();
+  if (!settings.pages.secretariatEnabled) notFound();
   const member = await getPublishedSecretariatMember(slug);
 
   if (!member) {

@@ -5,6 +5,7 @@ import RichText from "@/components/RichText";
 import { getPublishedCommittee, getPublishedCommittees } from "@/lib/content";
 import { notFound } from "next/navigation";
 import { COPY, formatConferenceText } from "@/lib/conference";
+import { getSiteSettings } from "@/lib/siteSettings";
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -34,6 +35,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 const CommitteePage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
+  const settings = await getSiteSettings();
+  if (!settings.pages.committeesEnabled) notFound();
   const committee = await getPublishedCommittee(slug);
 
   if (!committee) {

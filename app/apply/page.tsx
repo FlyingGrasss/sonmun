@@ -2,7 +2,9 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { APPLICATIONS, CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
+import { ClipboardCheck, Globe2, Landmark, Newspaper, Star, type LucideIcon } from 'lucide-react';
+import { CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export const metadata: Metadata = {
   title: 'Apply',
@@ -21,61 +23,31 @@ const CARD_TONES: Record<string, 'gold' | 'copper' | 'cream' | 'rose'> = {
   press: 'gold',
 };
 
+const MOBILE_CARD_ORDER: Record<string, string> = {
+  delegate: 'order-1 md:order-none',
+  delegation: 'order-2 md:order-none',
+  admin: 'order-3 md:order-none',
+  chair: 'order-4 md:order-none',
+  press: 'order-5 md:order-none',
+};
+
+const APPLICATION_ICONS: Record<string, LucideIcon> = {
+  delegation: Landmark,
+  delegate: Globe2,
+  admin: ClipboardCheck,
+  chair: Star,
+  press: Newspaper,
+};
+
 function ApplicationIcon({ type }: { type: string }) {
-  const commonProps = {
-    fill: 'none',
-    viewBox: '0 0 24 24',
-    stroke: 'currentColor',
-    strokeWidth: 1.8,
-    'aria-hidden': true,
-  } as const;
-
-  if (type === 'delegation') {
-    return (
-      <svg {...commonProps}>
-        <circle cx="12" cy="12" r="9" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z" />
-      </svg>
-    );
-  }
-
-  if (type === 'delegate') {
-    return (
-      <svg {...commonProps}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m15 9-2.5 5.5L7 17l2.5-5.5L15 9zM12 3a9 9 0 1 0 9 9" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3a9 9 0 0 1 9 9" />
-      </svg>
-    );
-  }
-
-  if (type === 'admin') {
-    return (
-      <svg {...commonProps}>
-        <rect x="5" y="4" width="14" height="16" rx="2" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="m8 12 2 2 5-5M8 17h8" />
-      </svg>
-    );
-  }
-
-  if (type === 'chair') {
-    return (
-      <svg {...commonProps}>
-        <circle cx="12" cy="12" r="8.5" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg {...commonProps}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8zM8 8l1.5-3h5L16 8M9 12h6M9 16h3" />
-    </svg>
-  );
+  const Icon = APPLICATION_ICONS[type] ?? Newspaper;
+  return <Icon size={28} strokeWidth={1.8} aria-hidden="true" />;
 }
 
-const Apply = () => {
+const Apply = async () => {
+  const settings = await getSiteSettings();
   const applications = APPLICATION_ORDER
-    .map((id) => APPLICATIONS.find((application) => application.id === id))
+    .map((id) => settings.applications.find((application) => application.id === id))
     .filter((application) => application?.enabled);
 
   return (
@@ -90,7 +62,7 @@ const Apply = () => {
             <Link
               key={app.id}
               href={`/apply/${app.id}`}
-              className={`sonmun-apply-card sonmun-apply-card--${CARD_TONES[app.id] ?? 'gold'} group`}
+              className={`sonmun-apply-card sonmun-apply-card--${CARD_TONES[app.id] ?? 'gold'} group ${MOBILE_CARD_ORDER[app.id] ?? 'order-10 md:order-none'}`}
             >
               <div className="sonmun-apply-card__icon">
                 <ApplicationIcon type={app.id} />

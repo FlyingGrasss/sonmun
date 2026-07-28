@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { ASSETS, CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export const metadata: Metadata = {
   title: "Letters",
@@ -31,37 +32,40 @@ export const metadata: Metadata = {
   },
 };
 
-const Letters = () => {
+const Letters = async () => {
+  const settings = await getSiteSettings();
+  const { conference, letters } = settings;
+
   return (
     <div>
-      <h1 className="text-white text-center text-5xl max-sm:text-3xl max-sm:pt-6 pt-12">
-        {COPY.letters.titlePrefix} <br className="sm:hidden" />{" "}
+      <h1 className="text-6xl max-sm:text-4xl mt-20 mb-20 text-center text-white font-bold tracking-tight">
+        {letters.titlePrefix} <br className="sm:hidden" />{" "}
         <span className="text-[var(--color-accent)] font-black">
-          {COPY.letters.titleHighlight}
+          {letters.titleHighlight}
         </span>
       </h1>
 
       <p className="text-white mx-auto w-[1000px] max-sm:w-[350px] max-sm:text-sm text-2xl bg-black/60 relative rounded-4xl max-sm:rounded-2xl max-sm:px-8 max-sm:py-4 max-sm:my-6 px-16 py-8 my-12">
-        {COPY.letters.opening}
+        {letters.opening}
         <br />
         <br />
-        {COPY.letters.paragraphs.map((paragraph, index) => (
+        {letters.paragraphs.map((paragraph, index) => (
           <span key={paragraph}>
             {formatConferenceText(paragraph, {
-              sessionName: CONFERENCE.sessionName,
-              dates: CONFERENCE.dates,
-              shortName: CONFERENCE.shortName,
+              sessionName: conference.sessionName,
+              dates: conference.dates,
+              shortName: conference.shortName,
             })}
-            {index < COPY.letters.paragraphs.length - 1 && <><br /><br /></>}
+            {index < letters.paragraphs.length - 1 && <><br /><br /></>}
           </span>
         ))}
         <br />
         <br />
         <span className="text-[var(--color-accent)] font-black">
-          {CONFERENCE.organizer.name}
+          {conference.organizer.name}
         </span>
         <br />
-        {CONFERENCE.hashtag}
+        {conference.hashtag}
 
         <Image
           src={ASSETS.mail}

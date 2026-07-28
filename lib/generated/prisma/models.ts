@@ -11,4 +11,5 @@
 export type * from './models/VerificationCode'
 export type * from './models/Committee'
 export type * from './models/SecretariatMember'
+export type * from './models/ConferenceSettings'
 export type * from './commonInputTypes'

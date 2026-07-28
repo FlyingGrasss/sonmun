@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   VerificationCode: 'VerificationCode',
   Committee: 'Committee',
-  SecretariatMember: 'SecretariatMember'
+  SecretariatMember: 'SecretariatMember',
+  ConferenceSettings: 'ConferenceSettings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -118,6 +119,16 @@ export const SecretariatMemberScalarFieldEnum = {
 export type SecretariatMemberScalarFieldEnum = (typeof SecretariatMemberScalarFieldEnum)[keyof typeof SecretariatMemberScalarFieldEnum]
 
 
+export const ConferenceSettingsScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConferenceSettingsScalarFieldEnum = (typeof ConferenceSettingsScalarFieldEnum)[keyof typeof ConferenceSettingsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -132,6 +143,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

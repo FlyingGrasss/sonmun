@@ -2,29 +2,33 @@
 
 import Link from "next/link";
 import Countdown from "@/components/Countdown";
-import { CONFERENCE, COPY } from "@/lib/conference";
+import { COPY } from "@/lib/conference";
+import { getSiteSettings } from "@/lib/siteSettings";
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getSiteSettings();
+  const conference = settings.conference;
+
   return (
     <div className="relative min-h-screen">
       <main className="relative z-10 flex min-h-[calc(100vh-108px)] flex-col items-center justify-center gap-10 px-4 py-12 max-sm:gap-8 max-sm:py-8">
         <div className="text-center">
           <h1 className="conference-title sonmun-reveal sonmun-reveal-1 text-7xl max-sm:text-[40px] font-bold mb-4">
-            {CONFERENCE.displayName}
+            {conference.displayName}
           </h1>
           <p className="sonmun-reveal sonmun-reveal-2 text-white text-2xl max-sm:text-lg mb-2">
-            {CONFERENCE.dates}
+            {conference.dates}
           </p>
           <p className="sonmun-reveal sonmun-reveal-3 mx-auto max-w-2xl text-white/85 text-lg max-sm:text-sm">
-            {CONFERENCE.sessionName}
+            {conference.sessionName}
           </p>
           <p className="sonmun-reveal sonmun-reveal-4 mt-3 text-[var(--color-highlight)] text-lg font-semibold">
-            {CONFERENCE.hashtag}
+            {conference.hashtag}
           </p>
         </div>
 
         <div className="sonmun-reveal sonmun-reveal-5 max-sm:scale-90 max-sm:origin-center">
-          <Countdown />
+          <Countdown startDateIso={conference.startDateIso} />
         </div>
 
         <Link href="/apply" className="sonmun-reveal sonmun-reveal-6 w-fit">

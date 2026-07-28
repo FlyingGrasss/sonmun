@@ -399,7 +399,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   VerificationCode: 'VerificationCode',
   Committee: 'Committee',
-  SecretariatMember: 'SecretariatMember'
+  SecretariatMember: 'SecretariatMember',
+  ConferenceSettings: 'ConferenceSettings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "verificationCode" | "committee" | "secretariatMember"
+    modelProps: "verificationCode" | "committee" | "secretariatMember" | "conferenceSettings"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -641,6 +642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ConferenceSettings: {
+      payload: Prisma.$ConferenceSettingsPayload<ExtArgs>
+      fields: Prisma.ConferenceSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConferenceSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConferenceSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.ConferenceSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConferenceSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.ConferenceSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.ConferenceSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.ConferenceSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConferenceSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.ConferenceSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        update: {
+          args: Prisma.ConferenceSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConferenceSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConferenceSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConferenceSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConferenceSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConferenceSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.ConferenceSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConferenceSettings>
+        }
+        groupBy: {
+          args: Prisma.ConferenceSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConferenceSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConferenceSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConferenceSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -726,6 +801,16 @@ export const SecretariatMemberScalarFieldEnum = {
 export type SecretariatMemberScalarFieldEnum = (typeof SecretariatMemberScalarFieldEnum)[keyof typeof SecretariatMemberScalarFieldEnum]
 
 
+export const ConferenceSettingsScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConferenceSettingsScalarFieldEnum = (typeof ConferenceSettingsScalarFieldEnum)[keyof typeof ConferenceSettingsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -740,6 +825,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1003,6 +1095,7 @@ export type GlobalOmitConfig = {
   verificationCode?: Prisma.VerificationCodeOmit
   committee?: Prisma.CommitteeOmit
   secretariatMember?: Prisma.SecretariatMemberOmit
+  conferenceSettings?: Prisma.ConferenceSettingsOmit
 }
 
 /* Types for Logging */

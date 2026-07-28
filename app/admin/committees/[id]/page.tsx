@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteCommitteeAction, updateCommitteeAction } from "@/app/admin/actions";
+import ImageUrlField from "@/components/admin/ImageUrlField";
 import { stringifyDocuments } from "@/lib/documents";
 import { requireAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/prisma";
@@ -33,9 +34,9 @@ export default async function EditCommitteePage({
         <Link href="/admin" className="text-sm text-[var(--color-accent)]">Back to dashboard</Link>
         <h1 className="text-3xl font-bold">Edit Committee</h1>
         <input name="name" defaultValue={committee.name} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
-        <input name="slug" defaultValue={committee.slug} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
+        <label className="flex flex-col gap-2 text-sm">Link<input name="slug" defaultValue={committee.slug} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" /></label>
         <input name="sortOrder" type="number" defaultValue={committee.sortOrder} className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
-        <input name="imageUrl" defaultValue={committee.imageUrl} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
+        <ImageUrlField name="imageUrl" id="committee-image-url" defaultValue={committee.imageUrl} required />
         <textarea name="description" rows={10} defaultValue={committee.description} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <textarea name="documents" rows={4} defaultValue={stringifyDocuments(committee.documents)} className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <label className="flex items-center gap-2 text-sm">

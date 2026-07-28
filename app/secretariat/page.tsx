@@ -5,6 +5,8 @@ export const revalidate = 60;
 import SecretariatCard from "@/components/SecretariatCard";
 import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
 import { getPublishedSecretariat } from "@/lib/content";
+import { getSiteSettings } from "@/lib/siteSettings";
+import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -27,6 +29,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 const Secretariat = async () => {
+  const settings = await getSiteSettings();
+  if (!settings.pages.secretariatEnabled) notFound();
   const allSecretariat = await getPublishedSecretariat();
 
   return (

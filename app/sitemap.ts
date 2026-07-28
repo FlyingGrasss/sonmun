@@ -1,15 +1,16 @@
-import { APPLICATIONS, CONFERENCE } from '@/lib/conference';
 import type { MetadataRoute } from 'next';
+import { getSiteSettings } from '@/lib/siteSettings';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const settings = await getSiteSettings();
   const currentDate = new Date();
   const routes = [
     ["", "yearly", 1],
-    ["/secretariat", "weekly", 0.8],
+    ...(settings.pages.secretariatEnabled ? [["/secretariat", "weekly", 0.8] as const] : []),
     ["/letters", "weekly", 0.7],
-    ["/committees", "monthly", 0.6],
+    ...(settings.pages.committeesEnabled ? [["/committees", "monthly", 0.6] as const] : []),
     ["/apply", "monthly", 0.5],
-    ...APPLICATIONS.filter((application) => application.enabled).map((application) => [
+    ...settings.applications.filter((application) => application.enabled).map((application) => [
       `/apply/${application.id}`,
       "weekly",
       0.8,
@@ -17,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ] as const;
 
   return routes.map(([path, changeFrequency, priority]) => ({
-    url: `${CONFERENCE.siteUrl}${path}`,
+    url: `${settings.conference.siteUrl}${path}`,
     lastModified: currentDate,
     changeFrequency,
     priority,

@@ -1,9 +1,17 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { CONFERENCE, COPY } from "@/lib/conference"
+import { COPY } from "@/lib/conference"
 
-const Footer = () => {
+const Footer = ({
+  year,
+  brandName,
+  organizer,
+}: {
+  year: number;
+  brandName: string;
+  organizer: { creditName: string; creditUrl: string };
+}) => {
   const pathname = usePathname()
 
   if (pathname?.startsWith("/admin")) {
@@ -12,14 +20,14 @@ const Footer = () => {
 
   return (
     <p className="text-white text-center min-[1800px]:text-xl">
-      &copy; {CONFERENCE.year} {CONFERENCE.brandName}, {COPY.footer.rights}{" "}
+      &copy; {year} {brandName}, {COPY.footer.rights}{" "}
       <br className="sm:hidden" />{" "}
       <a
-        href={CONFERENCE.organizer.creditUrl}
+        href={organizer.creditUrl}
         target="_blank"
         className="underline cursor-pointer"
       >
-        {CONFERENCE.organizer.creditName}
+        {organizer.creditName}
       </a>
     </p>
   )

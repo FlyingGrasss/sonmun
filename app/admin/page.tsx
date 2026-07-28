@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { logoutAction, createCommitteeAction, createSecretariatAction } from "@/app/admin/actions";
+import { logoutAction, createCommitteeAction, createSecretariatAction, saveConferenceSettingsAction } from "@/app/admin/actions";
+import AdminSettingsForm from "@/components/admin/AdminSettingsForm";
+import ImageUrlField from "@/components/admin/ImageUrlField";
 import { CONFERENCE } from "@/lib/conference";
 import { requireAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 export const metadata = {
   title: `Admin | ${CONFERENCE.shortName}`,
@@ -60,9 +63,10 @@ function Textarea({
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [committees, secretariat] = await Promise.all([
+  const [committees, secretariat, settings] = await Promise.all([
     prisma.committee.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
     prisma.secretariatMember.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
+    getSiteSettings(),
   ]);
 
   return (
@@ -75,11 +79,16 @@ export default async function AdminPage() {
             </p>
             <h1 className="text-4xl font-bold">Dashboard</h1>
           </div>
-          <form action={logoutAction}>
-            <button className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
-              Logout
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            <Link href="#conference-settings" className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
+              Conference Settings
+            </Link>
+            <form action={logoutAction}>
+              <button className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
+                Logout
+              </button>
+            </form>
+          </div>
         </header>
 
         <section className="grid gap-6 lg:grid-cols-2">
@@ -125,9 +134,9 @@ export default async function AdminPage() {
             <h2 className="text-2xl font-bold">New Committee</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Name" name="name" required />
-              <Field label="Slug" name="slug" />
+              <Field label="Link" name="slug" />
               <Field label="Sort Order" name="sortOrder" type="number" />
-              <Field label="Image URL" name="imageUrl" required />
+              <ImageUrlField name="imageUrl" id="committee-image-url" required />
             </div>
             <Textarea label="Description" name="description" required />
             <Textarea label="Documents, one per line: Title | URL" name="documents" rows={3} />
@@ -144,10 +153,10 @@ export default async function AdminPage() {
             <h2 className="text-2xl font-bold">New Secretariat Member</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Name" name="name" required />
-              <Field label="Slug" name="slug" />
+              <Field label="Link" name="slug" />
               <Field label="Role" name="role" required />
               <Field label="Sort Order" name="sortOrder" type="number" />
-              <Field label="Image URL" name="imageUrl" required />
+              <ImageUrlField name="imageUrl" id="secretariat-image-url" required />
               <Field label="Instagram URL" name="instagram" />
             </div>
             <Textarea label="Bio" name="bio" required />
@@ -159,6 +168,14 @@ export default async function AdminPage() {
               Create Member
             </button>
           </form>
+        </section>
+
+        <section id="conference-settings" className="flex flex-col gap-6">
+          <div>
+            <h2 className="text-3xl font-bold">Site Settings</h2>
+            <p className="mt-2 text-sm text-white/65">Conference content, applications, letters, visibility, and form rules are managed here alongside committees and Secretariat.</p>
+          </div>
+          <AdminSettingsForm settings={settings} action={saveConferenceSettingsAction} />
         </section>
       </div>
     </main>

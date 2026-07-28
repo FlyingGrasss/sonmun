@@ -14,6 +14,19 @@ Conference-specific content is stored in [`config/conference.json`](C:/Desktop/s
 
 Committee and Secretariat content is database-backed and managed from `/admin`; it is intentionally not duplicated in JSON.
 
+## Admin panel
+
+After logging in at `/admin`, administrators can:
+
+- create, edit, publish, order, and delete committees and Secretariat members
+- edit conference names, dates, countdown start, hashtag, location, organizer details, and site URL
+- edit each application card/form title and description
+- enable or disable each application type; disabled types disappear from `/apply` and reject direct form/API requests
+- edit the existing labels and prompts for every delegate, chair, delegation, press, and admin question
+- edit the Letters page title, opening, and paragraphs
+
+Conference settings are stored in the `ConferenceSettings` database table. If the table is unavailable, the site falls back to `config/conference.json`. Editing question wording does not add new form fields; new fields still require a code/API change.
+
 ## Environment variables
 
 Copy `.env.example` to `.env.local` and fill in the values. It documents every variable used by the app without including secrets. `NEXT_PUBLIC_SITE_URL` is the only conference URL override; the default is the URL in `conference.json`.
@@ -34,6 +47,8 @@ Prisma is generated as part of `pnpm build`. After changing `prisma/schema.prism
 Before deploying, set the database, Resend, Google Sheets, and admin authentication variables in the hosting provider. Never commit `.env.local`.
 
 For local application API testing, set `DISABLE_EMAIL_SENDING=true`. The API stores the verification code and logs it locally instead of sending through Resend. Remove the flag or set it to `false` before testing real email delivery or deploying.
+
+After logging in at `/admin`, committees and Secretariat members, conference settings, application availability, form rules, application questions, and the letters page are managed from the same dashboard. Questions can be edited, added, or deleted per application type. The bottom of the Application Questions section also provides ordered, tab-separated Google Sheets headers ready to paste into cell `A1`. The image fields can upload PNG, JPG, WebP, and GIF files up to 10 MB directly to Vercel Blob; set `BLOB_STORE_ID` and `BLOB_READ_WRITE_TOKEN` in `.env.local` and your deployment environment.
 
 ## Google Sheets headers
 

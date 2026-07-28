@@ -7,22 +7,13 @@ const Card = ({
     imageUrl, 
     committeeName, 
     slug, 
-    description,
     align = 'left' 
 }: { 
     imageUrl: string, 
     committeeName: string, 
     slug: string,
-    description?: string,
     align?: 'left' | 'right'
 }) => {
-  
-  const plainDescription = description?.replace(/[#*_`-]/g, "").trim() ?? "";
-  const shortDesc =
-    plainDescription.length > 150
-      ? `${plainDescription.slice(0, 150)}...`
-      : plainDescription;
-
   const isImageRight = align === 'right';
 
   return (
@@ -45,10 +36,6 @@ const Card = ({
             {committeeName}
         </h2>
         
-        <p className="text-gray-300 text-lg md:text-xl leading-relaxed max-w-xl">
-            {shortDesc}
-        </p>
-
         <Link href={`/committees/${slug}`} className="w-fit mt-2">
             {/* 
                Button Layout Logic:

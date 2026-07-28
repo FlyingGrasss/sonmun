@@ -5,6 +5,8 @@ export const revalidate = 12000;
 import CommitteeCard from "@/components/CommitteeCard";
 import { getPublishedCommittees } from "@/lib/content";
 import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
+import { getSiteSettings } from "@/lib/siteSettings";
+import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -33,6 +35,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 const Committees = async () => {
+  const settings = await getSiteSettings();
+  if (!settings.pages.committeesEnabled) notFound();
   const allCommittees = await getPublishedCommittees();
 
   return (
@@ -49,7 +53,6 @@ const Committees = async () => {
                 imageUrl={committee.imageUrl}
                 committeeName={committee.name}
                 slug={committee.slug}
-                description={committee.description}
                 align={index % 2 !== 0 ? 'right' : 'left'}
               />
           ))}

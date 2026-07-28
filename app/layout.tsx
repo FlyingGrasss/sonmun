@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackgroundAnimations from "@/components/BackgroundAnimations";
 import { ASSETS, CONFERENCE, THEME } from "@/lib/conference";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 const tinos = Tinos({
   subsets: ["latin"],
@@ -74,11 +75,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
   return (
     <html lang="en" className="overflow-x-hidden max-w-screen scroll-smooth">
       <body
@@ -98,10 +101,18 @@ export default function RootLayout({
         <BackgroundAnimations />
 
         <div className="min-h-screen relative z-10">
-          <Navbar />
+          <Navbar
+            brandName={settings.conference.brandName}
+            showCommittees={settings.pages.committeesEnabled}
+            showSecretariat={settings.pages.secretariatEnabled}
+          />
           {children}
         </div>
-        <Footer />
+        <Footer
+          year={settings.conference.year}
+          brandName={settings.conference.brandName}
+          organizer={settings.conference.organizer}
+        />
         <Analytics />
       </body>
     </html>

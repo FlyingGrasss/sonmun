@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from "react";
-import { CONFERENCE } from "@/lib/conference";
 
 interface TimeLeft {
   days: number;
@@ -14,9 +13,7 @@ interface TimeLeft {
   seconds: number;
 }
 
-const targetDate = new Date(CONFERENCE.startDateIso).getTime();
-
-const calculateTimeLeft = (): TimeLeft => {
+const calculateTimeLeft = (targetDate: number): TimeLeft => {
   const now = new Date().getTime();
   const difference = targetDate - now;
 
@@ -45,7 +42,8 @@ const TimeUnit = ({ value, label, isMounted }: { value: number; label: string; i
   </div>
 );
 
-const Countdown = () => {
+const Countdown = ({ startDateIso }: { startDateIso: string }) => {
+  const targetDate = new Date(startDateIso).getTime();
   // 1. Initialize with a "safe" default state that will be the same on Server and Client
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
@@ -60,14 +58,14 @@ const Countdown = () => {
   useEffect(() => {
     // 3. Set the initial time and mark as mounted once we are on the client
     setIsMounted(true);
-    setTimeLeft(calculateTimeLeft());
+    setTimeLeft(calculateTimeLeft(targetDate));
 
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      setTimeLeft(calculateTimeLeft(targetDate));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   return (
     <div className="flex gap-4 max-sm:gap-2 justify-center">

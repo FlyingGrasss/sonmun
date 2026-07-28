@@ -1,7 +1,8 @@
 // app/apply/[applicationType]/layout.tsx
 
 import type { Metadata } from 'next';
-import { APPLICATIONS, CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
+import { COPY, formatConferenceText } from '@/lib/conference';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 type Props = {
   params: Promise<{ applicationType: string }>
@@ -9,18 +10,19 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { applicationType } = await params;
-  const application = APPLICATIONS.find((item) => item.id === applicationType);
+  const settings = await getSiteSettings();
+  const application = settings.applications.find((item) => item.id === applicationType);
   const type = application?.title ?? applicationType;
   
   return {
     title: `Apply - ${type}`,
     description: formatConferenceText(COPY.metadata.applicationDescription, {
       type,
-      shortName: CONFERENCE.shortName,
+      shortName: settings.conference.shortName,
     }),
     openGraph: {
       title: `Apply ${type}`,
-      url: `${CONFERENCE.siteUrl}/apply/${applicationType}`,
+      url: `${settings.conference.siteUrl}/apply/${applicationType}`,
     },
   };
 }

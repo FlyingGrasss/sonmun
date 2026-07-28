@@ -1,9 +1,10 @@
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { CONFERENCE, THEME } from '@/lib/conference';
+import { THEME } from '@/lib/conference';
 import getMessage from '@/lib/getMessage';
 import { prisma } from '@/lib/prisma';
+import { getSiteSettings, type EditableSettings } from '@/lib/siteSettings';
 
 interface RequestData {
   email: string;
@@ -40,6 +41,10 @@ export async function POST(
 ) {
   try {
     const { type } = await params;
+    const settings = await getSiteSettings();
+    if (!settings.applications.some((application) => application.id === type && application.enabled)) {
+      return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
+    }
     const data: RequestData = await request.json();
     const { email, name, lang = 'en' } = data;
     const sheetId = getSheetId(type);
@@ -122,7 +127,7 @@ export async function POST(
     if (disableEmailSending) {
       console.info(`[application-test] type=${type} email=${email} verificationCode=${code}`);
     } else {
-      await sendVerificationEmail(email, name, code, lang, type);
+      await sendVerificationEmail(email, name, code, lang, type, settings.conference);
     }
 
     return NextResponse.json(
@@ -145,46 +150,47 @@ async function sendVerificationEmail(
   name: string,
   code: string,
   lang: 'en' | 'tr',
-  type: string
+  type: string,
+  conference: EditableSettings['conference']
 ) {
   const fromEmail = process.env.RESEND_FROM_EMAIL!;
   const title = type.charAt(0).toUpperCase() + type.slice(1);
   const emailSubject =
     lang === 'en'
-      ? `Verify Your ${CONFERENCE.brandName} ${title} Application`
-      : `${CONFERENCE.brandName} ${title} Basvurusu Dogrulama`;
+      ? `Verify Your ${conference.brandName} ${title} Application`
+      : `${conference.brandName} ${title} Basvurusu Dogrulama`;
 
   const htmlContent =
     lang === 'en'
       ? `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: ${THEME.accent};">${CONFERENCE.shortName} ${title} Application</h1>
+        <h1 style="color: ${THEME.accent};">${conference.shortName} ${title} Application</h1>
         <p>Dear ${name},</p>
         <p>Thank you for applying!</p>
         <p>Your verification code is:</p>
         <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0;">
           ${code}
         </div>
-        <p>Best regards,<br/>${CONFERENCE.brandName} Secretariat</p>
+        <p>Best regards,<br/>${conference.brandName} Secretariat</p>
       </div>
     `
       : `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: ${THEME.accent};">${CONFERENCE.shortName} ${title} Basvurusu</h1>
+        <h1 style="color: ${THEME.accent};">${conference.shortName} ${title} Basvurusu</h1>
         <p>Sayin ${name},</p>
         <p>Basvurunuz icin tesekkurler!</p>
         <p>Dogrulama kodunuz:</p>
         <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0;">
           ${code}
         </div>
-        <p>Saygilarimizla,<br/>${CONFERENCE.brandName} Sekreteryasi</p>
+        <p>Saygilarimizla,<br/>${conference.brandName} Sekreteryasi</p>
       </div>
     `;
 
   if (!resend) return;
 
   const { error: resendError } = await resend.emails.send({
-    from: `${CONFERENCE.brandName} Team <${fromEmail}>`,
+    from: `${conference.brandName} Team <${fromEmail}>`,
     to: email,
     subject: emailSubject,
     html: htmlContent,

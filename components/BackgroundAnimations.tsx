@@ -3,7 +3,8 @@ import { Leaf } from "lucide-react";
 const BackgroundAnimations = () => {
   return (
     <div
-      className="pixel-field fixed inset-x-0 top-0 bottom-auto h-screen max-sm:h-[125vh] overflow-hidden pointer-events-none z-0"
+      className="pixel-field fixed inset-x-0 top-0 bottom-auto overflow-hidden pointer-events-none z-0"
+      style={{ height: "900px" }}
       aria-hidden="true"
     >
       <div className="sonmun-line-field absolute inset-0">

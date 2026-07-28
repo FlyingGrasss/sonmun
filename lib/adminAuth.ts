@@ -25,6 +25,16 @@ function isValidSignature(value: string, signature: string) {
   );
 }
 
+function isValidSession(session: string) {
+  const [expires, signature] = session.split(".");
+  const expiresAt = Number(expires);
+
+  if (!expires || !signature || Number.isNaN(expiresAt)) return false;
+  if (expiresAt <= Date.now()) return false;
+
+  return isValidSignature(expires, signature);
+}
+
 export async function setAdminSession() {
   const expires = Date.now() + SESSION_TTL_MS;
   const value = String(expires);
@@ -35,29 +45,20 @@ export async function setAdminSession() {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/admin",
+    path: "/",
     maxAge: SESSION_TTL_MS / 1000,
   });
 }
 
 export async function clearAdminSession() {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.set(COOKIE_NAME, "", { path: "/", maxAge: 0 });
+  cookieStore.set(COOKIE_NAME, "", { path: "/admin", maxAge: 0 });
 }
 
 export async function isAdminAuthenticated() {
   const cookieStore = await cookies();
-  const session = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!session) return false;
-
-  const [expires, signature] = session.split(".");
-  const expiresAt = Number(expires);
-
-  if (!expires || !signature || Number.isNaN(expiresAt)) return false;
-  if (expiresAt <= Date.now()) return false;
-
-  return isValidSignature(expires, signature);
+  return cookieStore.getAll(COOKIE_NAME).some(({ value }) => isValidSession(value));
 }
 
 export async function requireAdmin() {
