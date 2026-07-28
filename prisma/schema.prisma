@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model VerificationCode {
+  id              String   @id @default(cuid())
+  email           String
+  code            String
+  applicationType String
+  ip              String?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  @@unique([email, applicationType])
+  @@index([ip, createdAt])
+  @@index([expiresAt])
+}
+
+model Committee {
+  id          Int      @id @default(autoincrement())
+  sortOrder   Int      @default(0)
+  name        String
+  slug        String   @unique
+  imageUrl    String
+  description String   @db.Text
+  documents   Json?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SecretariatMember {
+  id          Int      @id @default(autoincrement())
+  sortOrder   Int      @default(0)
+  name        String
+  slug        String   @unique
+  role        String
+  imageUrl    String
+  bio         String   @db.Text
+  instagram   String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

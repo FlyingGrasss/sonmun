@@ -1,0 +1,166 @@
+import Link from "next/link";
+import { logoutAction, createCommitteeAction, createSecretariatAction } from "@/app/admin/actions";
+import { CONFERENCE } from "@/lib/conference";
+import { requireAdmin } from "@/lib/adminAuth";
+import { prisma } from "@/lib/prisma";
+
+export const metadata = {
+  title: `Admin | ${CONFERENCE.shortName}`,
+  robots: "noindex",
+};
+
+function Field({
+  label,
+  name,
+  type = "text",
+  required = false,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="flex flex-col gap-2 text-sm text-white">
+      {label}
+      <input
+        name={name}
+        type={type}
+        required={required}
+        className="rounded-lg border border-white/15 bg-white/10 px-3 py-2 outline-none focus:border-[var(--color-accent)]"
+      />
+    </label>
+  );
+}
+
+function Textarea({
+  label,
+  name,
+  required = false,
+  rows = 6,
+}: {
+  label: string;
+  name: string;
+  required?: boolean;
+  rows?: number;
+}) {
+  return (
+    <label className="flex flex-col gap-2 text-sm text-white">
+      {label}
+      <textarea
+        name={name}
+        rows={rows}
+        required={required}
+        className="rounded-lg border border-white/15 bg-white/10 px-3 py-2 outline-none focus:border-[var(--color-accent)]"
+      />
+    </label>
+  );
+}
+
+export default async function AdminPage() {
+  await requireAdmin();
+
+  const [committees, secretariat] = await Promise.all([
+    prisma.committee.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
+    prisma.secretariatMember.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
+  ]);
+
+  return (
+    <main className="min-h-screen bg-[var(--background)] px-4 py-10 text-white">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-[var(--color-accent)]">
+              {CONFERENCE.shortName}
+            </p>
+            <h1 className="text-4xl font-bold">Dashboard</h1>
+          </div>
+          <form action={logoutAction}>
+            <button className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
+              Logout
+            </button>
+          </form>
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-white/10 bg-black/25 p-6">
+            <h2 className="mb-4 text-2xl font-bold">Committees</h2>
+            <div className="space-y-3">
+              {committees.map((committee) => (
+                <div key={committee.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-4 py-3">
+                  <div>
+                    <p className="font-semibold">{committee.name}</p>
+                    <p className="text-sm text-gray-300">{committee.isPublished ? "Published" : "Draft"}</p>
+                  </div>
+                  <Link className="text-sm font-semibold text-[var(--color-accent)]" href={`/admin/committees/${committee.id}`}>
+                    Edit
+                  </Link>
+                </div>
+              ))}
+              {committees.length === 0 && <p className="text-sm text-gray-300">No committees yet.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-black/25 p-6">
+            <h2 className="mb-4 text-2xl font-bold">Secretariat</h2>
+            <div className="space-y-3">
+              {secretariat.map((member) => (
+                <div key={member.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-4 py-3">
+                  <div>
+                    <p className="font-semibold">{member.name}</p>
+                    <p className="text-sm text-gray-300">{member.role}</p>
+                  </div>
+                  <Link className="text-sm font-semibold text-[var(--color-accent)]" href={`/admin/secretariat/${member.id}`}>
+                    Edit
+                  </Link>
+                </div>
+              ))}
+              {secretariat.length === 0 && <p className="text-sm text-gray-300">No secretariat members yet.</p>}
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-2">
+          <form action={createCommitteeAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
+            <h2 className="text-2xl font-bold">New Committee</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Name" name="name" required />
+              <Field label="Slug" name="slug" />
+              <Field label="Sort Order" name="sortOrder" type="number" />
+              <Field label="Image URL" name="imageUrl" required />
+            </div>
+            <Textarea label="Description" name="description" required />
+            <Textarea label="Documents, one per line: Title | URL" name="documents" rows={3} />
+            <label className="flex items-center gap-2 text-sm text-white">
+              <input name="isPublished" type="checkbox" defaultChecked />
+              Published
+            </label>
+            <button className="rounded-lg bg-[var(--color-accent)] px-4 py-3 font-bold text-[var(--background)] hover:bg-white">
+              Create Committee
+            </button>
+          </form>
+
+          <form action={createSecretariatAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
+            <h2 className="text-2xl font-bold">New Secretariat Member</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Name" name="name" required />
+              <Field label="Slug" name="slug" />
+              <Field label="Role" name="role" required />
+              <Field label="Sort Order" name="sortOrder" type="number" />
+              <Field label="Image URL" name="imageUrl" required />
+              <Field label="Instagram URL" name="instagram" />
+            </div>
+            <Textarea label="Bio" name="bio" required />
+            <label className="flex items-center gap-2 text-sm text-white">
+              <input name="isPublished" type="checkbox" defaultChecked />
+              Published
+            </label>
+            <button className="rounded-lg bg-[var(--color-accent)] px-4 py-3 font-bold text-[var(--background)] hover:bg-white">
+              Create Member
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
+  );
+}

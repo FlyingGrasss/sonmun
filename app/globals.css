@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000;
+  --foreground: #fff;
+  --color-accent: #fff;
+  --color-middle: #000;
+  --color-warm: #000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background:
+    linear-gradient(180deg, var(--background) 0%, var(--color-middle) 48%, var(--color-warm) 100%) fixed;
+  color: var(--foreground);
+}
+
+.conference-title,
+.conference-brand {
+  color: var(--color-highlight);
+}
+
+.pixel-field::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-pattern) 17%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-pattern-strong) 13%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity: 0.55;
+  content: "";
+  pointer-events: none;
+}
+
+.sonmun-reveal {
+  opacity: 0;
+  animation: sonmun-hero-reveal 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sonmun-reveal-1 {
+  animation-delay: 80ms;
+}
+
+.sonmun-reveal-2 {
+  animation-delay: 180ms;
+}
+
+.sonmun-reveal-3 {
+  animation-delay: 280ms;
+}
+
+.sonmun-reveal-4 {
+  animation-delay: 380ms;
+}
+
+.sonmun-reveal-5 {
+  animation-delay: 500ms;
+}
+
+.sonmun-reveal-6 {
+  animation-delay: 660ms;
+}
+
+@keyframes sonmun-hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sonmun-reveal {
+    animation: none;
+    opacity: 1;
+  }
+}
+/* app/globals.css - Final styles */
+
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.glassmorphism:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-accent);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
