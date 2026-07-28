@@ -4,7 +4,7 @@
     "brandName": "SONMUN",
     "shortName": "SONMUN'26",
     "displayName": "SONMUN'26",
-    "fullName": "SONMUN Model United Nations Conference",
+    "fullName": "First Official Session of Summit of Next Model United Nations Conference",
     "sessionName": "First Official Session of Summit of Next Model United Nations Conference",
     "dates": "24-25-26 September 2026",
     "startDateIso": "2026-09-24T00:00:00+03:00",
@@ -77,7 +77,7 @@
     },
     {
       "id": "press",
-      "enabled": false,
+      "enabled": true,
       "title": "Press",
       "formTitle": "Press Application",
       "description": "Document the conference through reporting, photography, and media.",
@@ -85,7 +85,7 @@
     },
     {
       "id": "admin",
-      "enabled": false,
+      "enabled": true,
       "title": "Admin",
       "formTitle": "Admin Application",
       "description": "Support the conference team and help deliver a smooth experience.",
