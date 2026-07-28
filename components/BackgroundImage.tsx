@@ -15,8 +15,7 @@ export default function BackgroundImage() {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full z-[-1] overflow-hidden"
-      style={{ height: "900px" }}
+      className="fixed top-0 left-0 w-full h-screen max-sm:h-[125vh] z-[-1] overflow-hidden"
     >
       <Image
         src={ASSETS.background}

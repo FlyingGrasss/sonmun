@@ -42,13 +42,13 @@ The application API writes columns in fixed orders. To create a sheet header qui
 ### Delegate
 
 ```text
-Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	City	Grade	English Level	1. Committee	2. Committee	3. Committee	Experience	Motivation Letter	Dietary Preferences	Other Info
+Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	Grade	English Level	1. Committee	2. Committee	3. Committee	Experience	Motivation Letter	Dietary Preferences	Anything you would like to add?
 ```
 
 ### Chair
 
 ```text
-Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	City	Grade	English Level	1. Committee	2. Committee	3. Committee	Experience	Motivation Letter	GA Resolution Papers Question	Crisis Directive Question	Regular Committee Motions Question	Dietary Preferences	Other Info
+Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	Grade	English Level	1. Committee	2. Committee	3. Committee	Experience	References	Motivation Letter	GA Resolution Papers Question	Crisis Directive Question	Regular Committee Motions Question	Dietary Preferences	Anything you would like to add?
 ```
 
 ### Delegation
@@ -56,17 +56,17 @@ Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	City	Grade	English L
 Delegation submissions write one summary row and then one row per delegate. The slash in this header separates the summary-row value from the delegate-row value for columns that share the same position. Paste this single line into `A1`.
 
 ```text
-School Name / Delegate Full Name	Delegate Count / Birth Date	Advisor/delegation E-mail / National ID	Gender	1. Committee	2. Committee	3. Committee	English Level	Dietary Preferences	E-mail	Phone Number	City	Grade	Experience	Motivation Letter	Other Info
+School Name / Delegate Full Name	Delegate Count / Birth Date	Advisor/delegation E-mail / National ID	Gender	1. Committee	2. Committee	3. Committee	English Level	Dietary Preferences	E-mail	Phone Number	Grade	Experience	Motivation Letter	Anything you would like to add?
 ```
 
 ### Press
 
 ```text
-Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	City	Grade	Experience	Motivation Letter	Camera Model	Dietary Preferences	Other Info
+Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	Grade	Experience	Motivation Letter	Camera Model	Dietary Preferences	Anything you would like to add?
 ```
 
 ### Admin
 
 ```text
-Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	City	Grade	Experience	Motivation Letter	Dietary Preferences	Other Info
+Full Name	E-mail	Phone	National ID	Birth Date	Gender	School	Grade	Experience	Motivation Letter	Dietary Preferences	Anything you would like to add?
 ```

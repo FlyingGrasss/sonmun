@@ -25,7 +25,6 @@ interface FormData {
   nationalId: string;
   gender: string;
   grade: string;
-  city: string;
   dietaryPreferences: string;
   additionalInfo: string;
 
@@ -40,12 +39,21 @@ interface FormData {
   numberOfDelegates: number;
 
   // Chair Specific
+  references?: string;
   chairAnswer1?: string;
   chairAnswer2?: string;
   chairAnswer3?: string;
 }
 
 const COMMITTEES = FORM.committees;
+
+const hasGeneralAssemblyCommittee = (preferences: string[]) =>
+  preferences.some((committee) =>
+    /\b(?:GA|UNGA|General Assembly)\b/i.test(committee)
+  );
+
+const hasCrisisCommittee = (preferences: string[]) =>
+  preferences.some((committee) => /\bCrisis\b/i.test(committee));
 
 const initialFormState: FormData = {
   fullName: '',
@@ -56,7 +64,6 @@ const initialFormState: FormData = {
   gender: '',
   school: '',
   grade: '',
-  city: '',
   motivationLetter: '',
   experience: '',
   committeePreferences: Array(FORM.committeePreferenceCount).fill(''),
@@ -65,6 +72,7 @@ const initialFormState: FormData = {
   dietaryPreferences: '',
   camera: '',
   numberOfDelegates: FORM.minimumDelegates,
+  references: '',
   chairAnswer1: '',
   chairAnswer2: '',
   chairAnswer3: ''
@@ -78,7 +86,6 @@ interface DelegateMember {
   nationalId: string;
   gender: string;
   grade: string;
-  city: string;
   motivationLetter: string;
   experience: string;
   committeePreferences: string[];
@@ -191,11 +198,27 @@ const ApplicationForm = ({
   };
 
   const handleCommitteeChange = (index: number, value: string) => {
-    const newPreferences = [...formData.committeePreferences];
-    newPreferences[index] = value;
     setFormData((prev) => ({
       ...prev,
-      committeePreferences: newPreferences
+      committeePreferences: prev.committeePreferences.map((preference, preferenceIndex) =>
+        preferenceIndex === index ? value : preference
+      ),
+      ...(applicationType === 'chair' &&
+      !hasGeneralAssemblyCommittee(
+        prev.committeePreferences.map((preference, preferenceIndex) =>
+          preferenceIndex === index ? value : preference
+        )
+      )
+        ? { chairAnswer1: '' }
+        : {}),
+      ...(applicationType === 'chair' &&
+      !hasCrisisCommittee(
+        prev.committeePreferences.map((preference, preferenceIndex) =>
+          preferenceIndex === index ? value : preference
+        )
+      )
+        ? { chairAnswer3: '' }
+        : {})
     }));
   };
 
@@ -226,7 +249,6 @@ const ApplicationForm = ({
       nationalId: '',
       gender: '',
       grade: '',
-      city: '',
       motivationLetter: '',
       experience: '',
       committeePreferences: Array(FORM.committeePreferenceCount).fill(''),
@@ -553,19 +575,6 @@ const ApplicationForm = ({
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-white text-sm font-medium mb-2">
-              {questions.city}
-            </label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-              required
-            />
-          </div>
         </>
       )}
     </div>
@@ -617,6 +626,21 @@ const ApplicationForm = ({
         />
       </div>
 
+      {applicationType === 'chair' && (
+        <div>
+          <label className="block text-white text-sm font-medium mb-2">
+            {questions.references}
+          </label>
+          <textarea
+            name="references"
+            value={formData.references}
+            onChange={handleInputChange}
+            rows={3}
+            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+          />
+        </div>
+      )}
+
       {(applicationType === 'delegate' || applicationType === 'chair') && (
         <>
           <div>
@@ -649,30 +673,34 @@ const ApplicationForm = ({
 
           {applicationType === 'chair' ? (
             <div className="space-y-6">
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">
-                  {questions.chairAnswer1}
-                </label>
-                <textarea
-                  name="chairAnswer1"
-                  value={formData.chairAnswer1}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                  rows={4}
-                />
-              </div>
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">
-                  {questions.chairAnswer3}
-                </label>
-                <textarea
-                  name="chairAnswer3"
-                  value={formData.chairAnswer3}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                  rows={4}
-                />
-              </div>
+              {hasGeneralAssemblyCommittee(formData.committeePreferences) && (
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    {questions.chairAnswer1}
+                  </label>
+                  <textarea
+                    name="chairAnswer1"
+                    value={formData.chairAnswer1}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+                    rows={4}
+                  />
+                </div>
+              )}
+              {hasCrisisCommittee(formData.committeePreferences) && (
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">
+                    {questions.chairAnswer3}
+                  </label>
+                  <textarea
+                    name="chairAnswer3"
+                    value={formData.chairAnswer3}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+                    rows={4}
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-white text-sm font-medium mb-2">
                   {questions.chairAnswer2}
@@ -929,20 +957,6 @@ const ApplicationForm = ({
                         </option>
                       ))}
                     </select>
-                    <input
-                      placeholder={questions.delegateCity}
-                      value={d.city}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'city',
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                      required
-                    />
-
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-white text-sm">
                         {questions.delegateCommitteePreferences}

@@ -26,16 +26,239 @@ body {
   color: var(--color-highlight);
 }
 
-.pixel-field::before {
+.sonmun-line-field {
+  overflow: hidden;
+}
+
+.sonmun-line {
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-pattern) 17%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-pattern-strong) 13%, transparent) 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: 0.55;
-  content: "";
-  pointer-events: none;
+  left: 50%;
+  bottom: -15vh;
+  width: 220vw;
+  height: 118vh;
+  border: 1px solid color-mix(in srgb, var(--color-pattern-strong) 60%, transparent);
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  transform-origin: center;
+}
+
+.sonmun-line-1 {
+  bottom: -15vh;
+  opacity: 0.22;
+}
+
+.sonmun-line-2 {
+  bottom: -22vh;
+  opacity: 0.24;
+}
+
+.sonmun-line-3 {
+  bottom: -29vh;
+  opacity: 0.26;
+}
+
+.sonmun-line-4 {
+  bottom: -36vh;
+  opacity: 0.28;
+}
+
+.sonmun-line-5 {
+  bottom: -43vh;
+  opacity: 0.3;
+}
+
+.sonmun-line-6 {
+  bottom: -50vh;
+  opacity: 0.32;
+}
+
+.sonmun-line-7 {
+  bottom: -57vh;
+  opacity: 0.34;
+}
+
+.sonmun-line-8 {
+  bottom: -64vh;
+  opacity: 0.34;
+}
+
+.sonmun-line-9 {
+  bottom: -71vh;
+  opacity: 0.32;
+}
+
+.sonmun-line-10 {
+  bottom: -78vh;
+  opacity: 0.3;
+}
+
+.sonmun-line-11 {
+  bottom: -85vh;
+  opacity: 0.28;
+}
+
+.sonmun-line-12 {
+  bottom: -92vh;
+  opacity: 0.26;
+}
+
+.sonmun-line-13 {
+  bottom: -99vh;
+  opacity: 0.24;
+}
+
+.sonmun-line-14 {
+  bottom: -106vh;
+  opacity: 0.22;
+}
+
+@media (max-width: 640px) {
+  .sonmun-line {
+    width: 300vw;
+    height: 132vh;
+    bottom: -8vh;
+  }
+
+  .sonmun-line-1 {
+    bottom: -8vh;
+  }
+
+  .sonmun-line-2 {
+    bottom: -15vh;
+  }
+
+  .sonmun-line-3 {
+    bottom: -22vh;
+  }
+
+  .sonmun-line-4 {
+    bottom: -29vh;
+  }
+
+  .sonmun-line-5 {
+    bottom: -36vh;
+  }
+
+  .sonmun-line-6 {
+    bottom: -43vh;
+  }
+
+  .sonmun-line-7 {
+    bottom: -50vh;
+  }
+
+  .sonmun-line-8 {
+    bottom: -57vh;
+  }
+
+  .sonmun-line-9 {
+    bottom: -64vh;
+  }
+
+  .sonmun-line-10 {
+    bottom: -71vh;
+  }
+
+  .sonmun-line-11 {
+    bottom: -78vh;
+  }
+
+  .sonmun-line-12 {
+    bottom: -85vh;
+  }
+
+  .sonmun-line-13 {
+    bottom: -92vh;
+  }
+
+  .sonmun-line-14 {
+    bottom: -99vh;
+  }
+}
+
+.sonmun-apply-card {
+  --apply-card-accent: #e06a61;
+  display: flex;
+  min-height: 298px;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--foreground) 18%, transparent);
+  border-radius: 16px;
+  padding: 32px 28px 28px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--apply-card-accent) 22%, #171716),
+    color-mix(in srgb, var(--apply-card-accent) 8%, #171716)
+  );
+  box-shadow: 0 16px 35px rgb(0 0 0 / 16%);
+  backdrop-filter: blur(12px);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.sonmun-apply-card--green {
+  --apply-card-accent: #72c19a;
+}
+
+.sonmun-apply-card:hover,
+.sonmun-apply-card:focus-visible {
+  border-color: color-mix(in srgb, var(--apply-card-accent) 58%, transparent);
+  box-shadow: 0 20px 42px rgb(0 0 0 / 24%);
+  transform: translateY(-4px);
+}
+
+.sonmun-apply-card:focus-visible {
+  outline: 2px solid var(--apply-card-accent);
+  outline-offset: 3px;
+}
+
+.sonmun-apply-card__icon {
+  display: flex;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--apply-card-accent) 54%, transparent);
+  border-radius: 12px;
+  color: var(--apply-card-accent);
+  background: color-mix(in srgb, var(--apply-card-accent) 13%, transparent);
+}
+
+.sonmun-apply-card__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.sonmun-apply-card__title {
+  margin-top: 18px;
+  color: var(--foreground);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.sonmun-apply-card__description {
+  max-width: 34ch;
+  margin-top: 16px;
+  color: color-mix(in srgb, var(--foreground) 66%, transparent);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.sonmun-apply-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--apply-card-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: gap 180ms ease;
+}
+
+.sonmun-apply-card:hover .sonmun-apply-card__cta,
+.sonmun-apply-card:focus-visible .sonmun-apply-card__cta {
+  gap: 12px;
 }
 
 .sonmun-reveal {

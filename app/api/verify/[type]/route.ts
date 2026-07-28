@@ -15,7 +15,6 @@ type DelegateMember = {
   dietaryPreferences?: string;
   email?: string;
   phoneNumber?: string;
-  city?: string;
   grade?: string;
   experience?: string;
   motivationLetter?: string;
@@ -32,13 +31,13 @@ type ApplicationPayload = {
   birthDate?: string;
   gender?: string;
   school?: string;
-  city?: string;
   grade?: string;
   englishLevel?: string;
   committeePreferences?: string[];
   experience?: string;
   motivationLetter?: string;
   camera?: string;
+  references?: string;
   chairAnswer1?: string;
   chairAnswer2?: string;
   chairAnswer3?: string;
@@ -133,11 +132,10 @@ export async function POST(
             d.dietaryPreferences, // 9: Diet
             d.email, // 10: Email
             d.phoneNumber, // 11: Phone Number
-            d.city, // 12: City
-            d.grade, // 13: Grade
-            d.experience, // 14: Experience
-            d.motivationLetter, // 15: Motivation Letter
-            d.additionalInfo // 16: Additional Info
+            d.grade, // 12: Grade
+            d.experience, // 13: Experience
+            d.motivationLetter, // 14: Motivation Letter
+            d.additionalInfo // 15: Anything you would like to add?
           ]);
         });
       }
@@ -150,7 +148,6 @@ export async function POST(
         formData.birthDate,
         formData.gender,
         formData.school,
-        formData.city,
         formData.grade
       ];
 
@@ -178,6 +175,7 @@ export async function POST(
           formData.committeePreferences?.[1] || '',
           formData.committeePreferences?.[2] || '',
           formData.experience,
+          formData.references,
           formData.motivationLetter,
           formData.chairAnswer1 || '', // GA Question
           formData.chairAnswer3 || '', // Crisis Directive Question

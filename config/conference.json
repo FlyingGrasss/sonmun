@@ -6,12 +6,12 @@
     "displayName": "SONMUN'26",
     "fullName": "First Official Session of Summit of Next Model United Nations Conference",
     "sessionName": "First Official Session of Summit of Next Model United Nations Conference",
-    "dates": "24-25-26 September 2026",
-    "startDateIso": "2026-09-24T00:00:00+03:00",
+    "dates": "25-26-27 September 2026",
+    "startDateIso": "2026-09-25T00:00:00+03:00",
     "year": 2026,
     "hashtag": "#summitoftomorrow",
     "location": {
-      "city": "TBA",
+      "city": "Izmir",
       "country": "Turkey"
     },
     "siteUrl": "https://sonmun.vercel.app",
@@ -56,15 +56,15 @@
       "enabled": true,
       "title": "Delegate",
       "formTitle": "Delegate Application",
-      "description": "Represent a country, research global issues, and participate in diplomatic debate.",
+      "description": "Represent a nation in one of our committees. Research, debate, and draft resolutions on pressing global issues.",
       "image": "/applications/delegate.webp"
     },
     {
       "id": "chair",
       "enabled": true,
-      "title": "Chair",
       "formTitle": "Chair Application",
-      "description": "Guide committee debate, support delegates, and maintain productive procedure.",
+      "title": "Chairboard",
+      "description": "Lead a committee as Chair or Vice-Chair. Guide debates, manage procedure, and ensure productive sessions.",
       "image": "/applications/chair.jpg"
     },
     {
@@ -72,15 +72,15 @@
       "enabled": true,
       "title": "Delegation",
       "formTitle": "Delegation Application",
-      "description": "Apply as a school or group delegation for SONMUN.",
+      "description": "Apply as a school or organization bringing multiple delegates. Register your institution and manage your group's participation.",
       "image": "/applications/delegation.webp"
     },
     {
       "id": "press",
       "enabled": true,
-      "title": "Press",
+      "title": "Press Corps",
       "formTitle": "Press Application",
-      "description": "Document the conference through reporting, photography, and media.",
+      "description": "Cover the conference as a journalist. Write reports, conduct interviews, and capture the spirit of SONMUN.",
       "image": "/applications/press.webp"
     },
     {
@@ -88,7 +88,7 @@
       "enabled": true,
       "title": "Admin",
       "formTitle": "Admin Application",
-      "description": "Support the conference team and help deliver a smooth experience.",
+      "description": "Be part of the organizing backbone of SONMUN. Manage logistics, communications, and conference operations.",
       "image": "/applications/admin.webp"
     }
   ],
@@ -116,7 +116,6 @@
         "gender": "Gender *",
         "school": "School Name *",
         "grade": "Grade/Level *",
-        "city": "City *",
         "motivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "motivationLetterPlaceholder": "Motivation Letter *",
         "experience": "Experience",
@@ -124,7 +123,7 @@
         "choice": "{number}. Choice",
         "englishLevel": "English Level *",
         "dietaryPreferences": "Dietary Preferences",
-        "additionalInfo": "Additional Info"
+        "additionalInfo": "Anything you would like to add?"
       },
       "chair": {
         "schoolName": "School Name *",
@@ -136,7 +135,6 @@
         "gender": "Gender *",
         "school": "School Name *",
         "grade": "Grade/Level *",
-        "city": "City *",
         "motivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "motivationLetterPlaceholder": "Motivation Letter *",
         "experience": "Experience",
@@ -145,9 +143,10 @@
         "chairAnswer1": "Case: Imagine that you are in the last session, and there are 2 different resolution papers, and none of them are finished nor qualified enough to be voted upon. There is literally no time to merge them, nor finish them. What would you do in this situation to stop committee from failing? (GA Only)",
         "chairAnswer3": "What should a complete directive include? (Crisis Only)",
         "chairAnswer2": "Please explain how a regular committee proceed while including the essential motions",
+        "references": "References",
         "englishLevel": "English Level *",
         "dietaryPreferences": "Dietary Preferences",
-        "additionalInfo": "Additional Info"
+        "additionalInfo": "Anything you would like to add?"
       },
       "delegation": {
         "schoolName": "School Name *",
@@ -161,7 +160,6 @@
         "delegateBirthDate": "Birth Date *",
         "delegateGender": "Gender *",
         "delegateGrade": "Grade *",
-        "delegateCity": "City *",
         "delegateCommitteePreferences": "Committee Preferences *",
         "choice": "{number}. Choice",
         "delegateEnglishLevel": "English Level *",
@@ -169,7 +167,7 @@
         "delegateExperience": "Experience",
         "delegateMotivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "delegateMotivationLetterPlaceholder": "Motivation Letter *",
-        "delegateAdditionalInfo": "Additional Info",
+        "delegateAdditionalInfo": "Anything you would like to add?",
         "motivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "experience": "Experience",
         "committeePreferences": "Committee Preferences (Top {committeePreferenceCount}) *"
@@ -184,14 +182,13 @@
         "gender": "Gender *",
         "school": "School Name *",
         "grade": "Grade/Level *",
-        "city": "City *",
         "motivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "motivationLetterPlaceholder": "Motivation Letter *",
         "experience": "Experience",
         "committeePreferences": "Committee Preferences (Top {committeePreferenceCount}) *",
         "camera": "Camera Model",
         "dietaryPreferences": "Dietary Preferences",
-        "additionalInfo": "Additional Info"
+        "additionalInfo": "Anything you would like to add?"
       },
       "admin": {
         "schoolName": "School Name *",
@@ -203,13 +200,12 @@
         "gender": "Gender *",
         "school": "School Name *",
         "grade": "Grade/Level *",
-        "city": "City *",
         "motivationLetter": "Motivation Letter * (Min {minimumMotivationWords} Words)",
         "motivationLetterPlaceholder": "Motivation Letter *",
         "experience": "Experience",
         "committeePreferences": "Committee Preferences (Top {committeePreferenceCount}) *",
         "dietaryPreferences": "Dietary Preferences",
-        "additionalInfo": "Additional Info"
+        "additionalInfo": "Anything you would like to add?"
       }
     },
     "labels": {

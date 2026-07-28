@@ -1,63 +1,104 @@
 // app/apply/page.tsx
 
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { APPLICATIONS, CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
 
 export const metadata: Metadata = {
-  title: "Apply",
+  title: 'Apply',
   description: formatConferenceText(COPY.metadata.applyDescription, {
     shortName: CONFERENCE.shortName,
   }),
 };
 
-const Apply = () => {
+const APPLICATION_ORDER = ['delegation', 'delegate', 'admin', 'chair', 'press'];
+
+const CARD_TONES: Record<string, 'warm' | 'green'> = {
+  delegation: 'warm',
+  delegate: 'warm',
+  admin: 'green',
+  chair: 'warm',
+  press: 'green',
+};
+
+function ApplicationIcon({ type }: { type: string }) {
+  const commonProps = {
+    fill: 'none',
+    viewBox: '0 0 24 24',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    'aria-hidden': true,
+  } as const;
+
+  if (type === 'delegation') {
+    return (
+      <svg {...commonProps}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h1v11H4zm15 0h1v11h-1zM9 10h1v11H9zm5 0h1v11h-1z" />
+      </svg>
+    );
+  }
+
+  if (type === 'delegate') {
+    return (
+      <svg {...commonProps}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    );
+  }
+
+  if (type === 'admin') {
+    return (
+      <svg {...commonProps}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    );
+  }
+
+  if (type === 'chair') {
+    return (
+      <svg {...commonProps}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+      </svg>
+    );
+  }
+
   return (
-    <div className="min-h-screen py-20 px-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-6xl max-sm:text-4xl mb-16 text-center text-[var(--color-accent)] font-bold">
+    <svg {...commonProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+    </svg>
+  );
+}
+
+const Apply = () => {
+  const applications = APPLICATION_ORDER
+    .map((id) => APPLICATIONS.find((application) => application.id === id))
+    .filter((application) => application?.enabled);
+
+  return (
+    <div className="min-h-screen px-4 py-20 max-sm:py-12">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="mb-14 text-center text-6xl font-bold text-[var(--color-accent)] max-sm:mb-10 max-sm:text-4xl">
           {COPY.pages.applyTitle}
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
-          {APPLICATIONS.filter((app) => app.enabled).map((app) => (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {applications.map((app) => app && (
             <Link
               key={app.id}
               href={`/apply/${app.id}`}
-              // Added max-w-[300px] for mobile to prevent full screen width images
-              className="group relative w-full max-w-[300px] sm:max-w-sm rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_var(--color-accent)]"
+              className={`sonmun-apply-card sonmun-apply-card--${CARD_TONES[app.id] ?? 'warm'} group`}
             >
-              {/* Background Image */}
-              <div className="relative h-[400px] w-full">
-                <Image
-                  src={app.image}
-                  alt={`Apply ${app.title}`}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent opacity-90 transition-opacity duration-300" />
-
-                {/* Border effect */}
-                <div className="absolute inset-0 border-4 border-transparent group-hover:border-[var(--color-accent)] transition-colors duration-300 rounded-3xl z-20 pointer-events-none" />
+              <div className="sonmun-apply-card__icon">
+                <ApplicationIcon type={app.id} />
               </div>
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-8 z-10">
-                <h2 className="text-3xl font-bold text-white mb-2 group-hover:text-[var(--color-accent)] transition-colors">
-                  {app.title}
-                </h2>
-                <p className="text-gray-300 mb-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                  {app.description}
-                </p>
-
-                <span className="flex items-center gap-2 text-white font-medium group-hover:gap-4 transition-all duration-300">
-                  {COPY.pages.applicationFormLink}
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </div>
+              <h2 className="sonmun-apply-card__title">{app.title}</h2>
+              <p className="sonmun-apply-card__description">{app.description}</p>
+              <span className="sonmun-apply-card__cta">
+                {COPY.home.applyButton}
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
             </Link>
           ))}
         </div>
