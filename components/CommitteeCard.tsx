@@ -42,7 +42,7 @@ const Card = ({
                - If Image is Right (align='right'): Text is Left. Arrow points Right -> `flex-row` (Text then Arrow)
                - If Image is Left (align='left'): Text is Right. Arrow points Left -> `flex-row-reverse` (Arrow then Text)
             */}
-            <button className={`group glassmorphism text-lg cursor-pointer items-center transition-all duration-300 justify-center gap-3 inline-flex backdrop-blur-md rounded-full px-8 py-3 shadow-lg border border-white/20 hover:border-[var(--color-accent)] ${isImageRight ? 'flex-row' : 'flex-row-reverse'}`}>
+            <button className={`group glassmorphism text-lg cursor-pointer items-center transition-all duration-300 justify-center gap-3 inline-flex max-sm:flex-row backdrop-blur-md rounded-full px-8 py-3 shadow-lg border border-white/20 hover:border-[var(--color-accent)] ${isImageRight ? 'flex-row' : 'flex-row-reverse'}`}>
                 <span>Explore</span>
                 <svg
                     width="20"
@@ -54,7 +54,7 @@ const Card = ({
                     // If Image Right (normal flex), arrow is normal to point right.
                     className={`transition-transform duration-300 fill-white group-hover:fill-[var(--color-accent)] ${
                         !isImageRight 
-                        ? 'rotate-180 group-hover:-translate-x-2' // Pointing Left 
+                        ? 'rotate-180 max-sm:rotate-0 group-hover:-translate-x-2 max-sm:group-hover:translate-x-2' // Pointing Left on desktop, right on mobile
                         : 'group-hover:translate-x-2'              // Pointing Right
                     }`}
                 >
