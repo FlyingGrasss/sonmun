@@ -20,12 +20,12 @@ export function getApplicationQuestions(type: string) {
 }
 
 export function formatConferenceText(
-  value: string,
+  value: string | null | undefined,
   replacements: Record<string, string | number>
 ) {
   return Object.entries(replacements).reduce(
     (text, [key, replacement]) => text.replaceAll(`{${key}}`, String(replacement)),
-    value
+    value ?? ""
   );
 }
 

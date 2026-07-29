@@ -34,6 +34,6 @@ export type Committee = Prisma.CommitteeModel
 export type SecretariatMember = Prisma.SecretariatMemberModel
 /**
  * Model ConferenceSettings
- *
+ * 
  */
 export type ConferenceSettings = Prisma.ConferenceSettingsModel
