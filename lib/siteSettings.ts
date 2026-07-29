@@ -38,7 +38,6 @@ export type EditableSettings = {
   };
   applications: EditableApplication[];
   form: {
-    minimumMotivationWords: number;
     minimumDelegates: number;
     committeePreferenceCount: number;
   };
@@ -89,7 +88,6 @@ export const fallbackSettings: EditableSettings = {
   },
   applications: config.applications.map((application) => ({ ...application })),
   form: {
-    minimumMotivationWords: config.form.minimumMotivationWords,
     minimumDelegates: config.form.minimumDelegates,
     committeePreferenceCount: config.form.committeePreferenceCount,
   },
@@ -153,7 +151,6 @@ function mergeSettings(value: unknown): EditableSettings {
     questions: normalizeQuestionGroups(
       savedQuestions ?? config.form.questions,
       {
-        minimumMotivationWords: Number(form.minimumMotivationWords ?? fallbackSettings.form.minimumMotivationWords),
         minimumDelegates: Number(form.minimumDelegates ?? fallbackSettings.form.minimumDelegates),
         committeePreferenceCount: Number(form.committeePreferenceCount ?? fallbackSettings.form.committeePreferenceCount),
       },

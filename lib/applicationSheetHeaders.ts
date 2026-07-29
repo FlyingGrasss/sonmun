@@ -1,7 +1,6 @@
 import { isInternalQuestionKey, type QuestionDefinition, type QuestionGroups } from "@/lib/questions";
 
 export type FormRules = {
-  minimumMotivationWords: number;
   minimumDelegates: number;
   committeePreferenceCount: number;
 };

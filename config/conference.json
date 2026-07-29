@@ -93,7 +93,6 @@
     }
   ],
   "form": {
-    "minimumMotivationWords": 150,
     "minimumDelegates": 8,
     "committeePreferenceCount": 3,
     "committees": [
@@ -122,7 +121,7 @@
         { "id": "choice3", "label": "3. Choice", "type": "dropdown", "required": false, "options": ["H-MIA", "DISEC", "UNWOMEN", "UNOCEAN", "CC: Age of Discovery", "NACA", "The San Remo Conference", "FKK: Muhteşem Yüzyıl"] },
         { "id": "experience", "label": "Previous Experiences", "type": "longText", "required": false },
         { "id": "magnificentCenturyKnowledge", "label": "Muhteşem Yüzyıl bilginizi 10 üzerinden nasıl değerlendirirsiniz?", "type": "number", "required": true, "placeholder": "0-10" },
-        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true },
+        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true, "minWords": 150 },
         { "id": "dietaryPreferences", "label": "Dietary Preferences", "type": "dropdown", "required": false, "options": ["Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-free", "Dairy-free"] },
         { "id": "additionalInfo", "label": "Anything you would like to add?", "type": "longText", "required": false }
       ],
@@ -140,7 +139,7 @@
         { "id": "choice3", "label": "3. Choice", "type": "dropdown", "required": false, "options": ["H-MIA", "DISEC", "UNWOMEN", "UNOCEAN", "CC: Age of Discovery", "NACA", "The San Remo Conference", "FKK: Muhteşem Yüzyıl"] },
         { "id": "experience", "label": "Previous Experiences", "type": "longText", "required": false },
         { "id": "magnificentCenturyKnowledge", "label": "Muhteşem Yüzyıl bilginizi 10 üzerinden nasıl değerlendirirsiniz?", "type": "number", "required": true, "placeholder": "0-10" },
-        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true },
+        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true, "minWords": 150 },
         { "id": "references", "label": "References", "type": "longText", "required": false },
         { "id": "chairDelegateOption", "label": "If your application for the chairboard is not approved, would you like to participate as a delegate?", "type": "dropdown", "required": false, "options": ["Yes", "No"] },
         { "id": "chairAiConcern", "label": "Some of your delegates on the committee are saying that another delegate is using AI. What would you do in that situation?", "type": "longText", "required": false },
@@ -170,7 +169,7 @@
         { "id": "delegatePhoneNumber", "label": "Delegate Phone", "type": "phone", "required": true },
         { "id": "delegateGrade", "label": "Grade/Level", "type": "dropdown", "required": true, "options": ["Preparation Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade", "Graduate"] },
         { "id": "delegateExperience", "label": "Previous Experiences", "type": "longText", "required": false },
-        { "id": "delegateMotivationLetter", "label": "Motivation Letter", "type": "longText", "required": true },
+        { "id": "delegateMotivationLetter", "label": "Motivation Letter", "type": "longText", "required": true, "minWords": 150 },
         { "id": "delegateAdditionalInfo", "label": "Anything you would like to add?", "type": "longText", "required": false }
       ],
       "press": [
@@ -183,7 +182,7 @@
         { "id": "school", "label": "School Name", "type": "shortText", "required": true },
         { "id": "grade", "label": "Grade/Level", "type": "dropdown", "required": true, "options": ["Preparation Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade", "Graduate"] },
         { "id": "experience", "label": "Previous Experiences", "type": "longText", "required": false },
-        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true },
+        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true, "minWords": 150 },
         { "id": "camera", "label": "Camera Model", "type": "shortText", "required": false },
         { "id": "dietaryPreferences", "label": "Dietary Preferences", "type": "dropdown", "required": false, "options": ["Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-free", "Dairy-free"] },
         { "id": "additionalInfo", "label": "Anything you would like to add?", "type": "longText", "required": false }
@@ -201,7 +200,7 @@
         { "id": "adminCrowdingStrategy", "label": "All committees exited for lunch or dessert at the same time, causing severe crowding in the dining area. What strategy should you and your team follow to prevent congestion in the hallways and corridors?", "type": "longText", "required": false },
         { "id": "adminNoteDuringProcedure", "label": "In a regular committee, a delegate asks you to pass a note while a motion is being raised or during a voting procedure. What would you do?", "type": "longText", "required": false },
         { "id": "adminExpectations", "label": "In your opinion, what should committee admins expect from floor/running admins?", "type": "longText", "required": false },
-        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true },
+        { "id": "motivationLetter", "label": "Motivation Letter", "type": "longText", "required": true, "minWords": 150 },
         { "id": "dietaryPreferences", "label": "Dietary Preferences", "type": "dropdown", "required": false, "options": ["Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-free", "Dairy-free"] },
         { "id": "additionalInfo", "label": "Anything you would like to add?", "type": "longText", "required": false }
       ]
@@ -256,8 +255,8 @@
     },
     "messages": {
       "minimumDelegates": "Minimum number of delegates is {minimumDelegates}",
-      "motivationTooShort": "Motivation letter must be at least {minimumMotivationWords} words.",
-      "delegateMotivationTooShort": "Delegate #{number}'s motivation letter must be at least {minimumMotivationWords} words.",
+      "motivationTooShort": "Motivation letter must be at least {minimumWords} words.",
+      "delegateMotivationTooShort": "Delegate #{number}'s motivation letter must be at least {minimumWords} words.",
       "verificationSent": "We've sent a verification code to",
       "selectNone": "None",
       "responses": {

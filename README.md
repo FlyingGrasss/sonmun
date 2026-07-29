@@ -26,7 +26,7 @@ After logging in at `/admin`, administrators can:
 - set optional minimum word and character limits for questions; use `0` to leave a limit disabled
 - edit the Letters page title, opening, and paragraphs
 
-Conference settings are stored in the `ConferenceSettings` database table. If the table is unavailable, the site falls back to `config/conference.json`. Application questions are ordered arrays of explicit question objects with an `id`, label, type, required flag, placeholder, and dropdown options. In the admin panel, edit the visible question text directly, choose the answer type, enter dropdown options one per line, use the arrows to set order, and delete or add rows as needed. The generated Google Sheets header below each application group follows that same order. The optional Muhteşem Yüzyıl rating appears after selecting `FKK: Muhteşem Yüzyıl` in delegate and chair applications.
+Conference settings are stored in the `ConferenceSettings` database table. If the table is unavailable, the site falls back to `config/conference.json`. Application questions are ordered arrays of explicit question objects with an `id`, label, type, required flag, placeholder, and dropdown options. In the admin panel, edit the visible question text directly, choose the answer type, enter dropdown options one per line, use the arrows to set order, and delete or add rows as needed. The generated Google Sheets header below each application group follows that same order. The required Muhteşem Yüzyıl rating appears after selecting `FKK: Muhteşem Yüzyıl` in delegate and chair applications.
 
 ## Environment variables
 

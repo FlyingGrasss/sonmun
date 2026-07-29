@@ -31,7 +31,6 @@ export function formatConferenceText(
 
 export function formatFormText(value: string, extra: Record<string, string | number> = {}) {
   return formatConferenceText(value, {
-    minimumMotivationWords: FORM.minimumMotivationWords,
     minimumDelegates: FORM.minimumDelegates,
     committeePreferenceCount: FORM.committeePreferenceCount,
     ...extra,

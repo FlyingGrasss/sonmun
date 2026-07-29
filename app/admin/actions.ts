@@ -171,7 +171,6 @@ export async function saveConferenceSettingsAction(formData: FormData) {
   conference.location.city = stringValue(formData, "locationCity");
   conference.location.country = stringValue(formData, "locationCountry");
   conference.organizer.name = stringValue(formData, "organizerName");
-  settings.form.minimumMotivationWords = Math.max(0, intValue(formData, "minimumMotivationWords"));
   settings.form.minimumDelegates = Math.max(1, intValue(formData, "minimumDelegates"));
 
   settings.pages.committeesEnabled = checkboxValue(formData, "committeesEnabled");

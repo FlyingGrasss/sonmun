@@ -23,7 +23,6 @@ export type QuestionDefinition = {
 export type QuestionGroups = Record<string, QuestionDefinition[]>;
 
 type QuestionRules = {
-  minimumMotivationWords: number;
   minimumDelegates: number;
   committeePreferenceCount: number;
 };
@@ -59,7 +58,6 @@ function inferQuestionType(key: string, label: string): QuestionType {
 
 function cleanQuestionText(value: string, rules: QuestionRules): string {
   return value
-    .replaceAll("{minimumMotivationWords}", String(rules.minimumMotivationWords))
     .replaceAll("{minimumDelegates}", String(rules.minimumDelegates))
     .replaceAll("{committeePreferenceCount}", String(rules.committeePreferenceCount))
     .replace(/#?\s*\{number\}/g, "")

@@ -117,19 +117,18 @@ const ApplicationForm = ({
   const dietaryOptions = getOptions(applicationType === 'delegation' ? 'delegateDietaryPreferences' : 'dietaryPreferences', FORM.options.dietaryPreferences);
   const rules = settings.form;
   const minimumWordsFor = (id: string) => {
-    const questionMinimum = getQuestion(id)?.minWords ?? 0;
-    if (questionMinimum > 0) return questionMinimum;
-    return id === 'motivationLetter' || id === 'delegateMotivationLetter'
-      ? rules.minimumMotivationWords
-      : 0;
+    return getQuestion(id)?.minWords ?? 0;
   };
   const formatQuestionText = (value: string, extra: Record<string, string | number> = {}) =>
     formatConferenceText(value, {
-      minimumMotivationWords: rules.minimumMotivationWords,
       minimumDelegates: rules.minimumDelegates,
       committeePreferenceCount: rules.committeePreferenceCount,
       ...extra,
     });
+  const renderQuestionLabel = (id: string, fallback = '') => {
+    const question = getQuestion(id);
+    return <>{formatQuestionText(question?.label ?? fallback)}{question?.required && <span className="ml-1 text-red-500" aria-hidden="true">*</span>}</>;
+  };
   const storageKey = `${settings.conference.id}_form_${applicationType}`;
   const delegatesStorageKey = `${settings.conference.id}_form_delegates_${applicationType}`;
   const [formData, setFormData] = useState<FormData>(() => ({
@@ -264,6 +263,14 @@ const ApplicationForm = ({
   };
 
   const handleGenerateForms = () => {
+    if (hasQuestion('schoolName') && !formData.school.trim()) {
+      setMainPageMessage({ text: 'Please enter your school or organization before generating delegate forms.', isError: true });
+      return;
+    }
+    if (hasQuestion('contactEmail') && !formData.email.trim()) {
+      setMainPageMessage({ text: 'Please enter your advisor or delegation email before generating delegate forms.', isError: true });
+      return;
+    }
     if (formData.numberOfDelegates < rules.minimumDelegates) {
       setMainPageMessage({
         text: formatQuestionText(FORM.messages.minimumDelegates),
@@ -359,7 +366,7 @@ const ApplicationForm = ({
       const minimumWords = minimumWordsFor('motivationLetter');
       if (minimumWords > 0 && getWordCount(formData.motivationLetter) < minimumWords) {
         setMainPageMessage({
-          text: formatQuestionText(FORM.messages.motivationTooShort, { minimumMotivationWords: minimumWords }),
+          text: formatQuestionText(FORM.messages.motivationTooShort, { minimumWords }),
           isError: true
         });
         setIsSubmitting(false);
@@ -374,7 +381,7 @@ const ApplicationForm = ({
           setMainPageMessage({
             text: formatQuestionText(FORM.messages.delegateMotivationTooShort, {
               number: i + 1,
-              minimumMotivationWords: minimumWords,
+              minimumWords,
             }),
             isError: true
           });
@@ -537,7 +544,7 @@ const ApplicationForm = ({
     <div className="space-y-4 md:col-span-2">
       {customQuestions.map((question) => (
         <label key={question.id} className="block text-white text-sm font-medium">
-          {question.label}
+          {renderQuestionLabel(question.id, question.label)}
           {renderCustomControl(question.id, question)}
         </label>
       ))}
@@ -548,8 +555,8 @@ const ApplicationForm = ({
       <div className={!hasQuestion(applicationType === 'delegation' ? 'schoolName' : 'fullName') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
           {applicationType === 'delegation'
-            ? questions.schoolName
-            : questions.fullName}
+            ? renderQuestionLabel('schoolName')
+            : renderQuestionLabel('fullName')}
         </label>
         <input
           type="text"
@@ -571,7 +578,7 @@ const ApplicationForm = ({
         <>
           <div className={!hasQuestion('birthDate') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.birthDate}
+              {renderQuestionLabel('birthDate')}
             </label>
             <input
               type="date"
@@ -584,7 +591,7 @@ const ApplicationForm = ({
           </div>
           <div className={!hasQuestion('phoneNumber') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.phoneNumber}
+              {renderQuestionLabel('phoneNumber')}
             </label>
             <input
               type="tel"
@@ -601,8 +608,8 @@ const ApplicationForm = ({
       <div className={!hasQuestion(applicationType === 'delegation' ? 'contactEmail' : 'email') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
           {applicationType === 'delegation'
-            ? questions.contactEmail
-            : questions.email}
+            ? renderQuestionLabel('contactEmail')
+            : renderQuestionLabel('email')}
         </label>
         <input
           type="email"
@@ -618,7 +625,7 @@ const ApplicationForm = ({
         <>
           <div className={!hasQuestion('nationalId') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.nationalId}
+              {renderQuestionLabel('nationalId')}
             </label>
             <input
               type="text"
@@ -631,7 +638,7 @@ const ApplicationForm = ({
           </div>
           <div className={!hasQuestion('gender') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.gender}
+              {renderQuestionLabel('gender')}
             </label>
             <select
               name="gender"
@@ -650,7 +657,7 @@ const ApplicationForm = ({
           </div>
           <div className={!hasQuestion('school') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.school}
+              {renderQuestionLabel('school')}
             </label>
             <input
               type="text"
@@ -663,7 +670,7 @@ const ApplicationForm = ({
           </div>
           <div className={!hasQuestion('grade') ? 'hidden' : ''}>
             <label className="block text-white text-sm font-medium mb-2">
-              {questions.grade}
+              {renderQuestionLabel('grade')}
             </label>
             <select
               name="grade"
@@ -702,7 +709,7 @@ const ApplicationForm = ({
     <div className="space-y-6">
       <div className={!hasQuestion('motivationLetter') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
-          {formatQuestionText(questions.motivationLetter)}
+          {renderQuestionLabel('motivationLetter')}
         </label>
         <textarea
           name="motivationLetter"
@@ -726,7 +733,7 @@ const ApplicationForm = ({
 
       <div className={!hasQuestion('experience') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
-          {questions.experience}
+          {renderQuestionLabel('experience')}
         </label>
         <textarea
           name="experience"
@@ -740,7 +747,7 @@ const ApplicationForm = ({
       {applicationType === 'chair' && (
         <div className={!hasQuestion('references') ? 'hidden' : ''}>
           <label className="block text-white text-sm font-medium mb-2">
-            {questions.references}
+            {renderQuestionLabel('references')}
           </label>
           <textarea
             name="references"
@@ -757,8 +764,9 @@ const ApplicationForm = ({
           <div className={!hasCommitteeChoices ? 'hidden' : ''}>
             <div className="space-y-3">
               {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
+                <label key={idx} className="block text-white text-sm font-medium">
+                  {renderQuestionLabel(`choice${idx + 1}`, `${idx + 1}. Choice`)}
                 <select
-                  key={idx}
                   value={formData.committeePreferences[idx]}
                   onChange={(e) =>
                     handleCommitteeChange(idx, e.target.value)
@@ -775,6 +783,7 @@ const ApplicationForm = ({
                     </option>
                   ))}
                 </select>
+                </label>
               ))}
             </div>
           </div>
@@ -784,7 +793,7 @@ const ApplicationForm = ({
               {hasGeneralAssemblyCommittee(formData.committeePreferences) && (
            <div className={!hasQuestion('chairAnswer1') ? 'hidden' : ''}>
                   <label className="block text-white text-sm font-medium mb-2">
-                    {questions.chairAnswer1}
+                    {renderQuestionLabel('chairAnswer1')}
                   </label>
                   <textarea
                     name="chairAnswer1"
@@ -798,7 +807,7 @@ const ApplicationForm = ({
               {hasCrisisCommittee(formData.committeePreferences) && (
            <div className={!hasQuestion('chairAnswer3') ? 'hidden' : ''}>
                   <label className="block text-white text-sm font-medium mb-2">
-                    {questions.chairAnswer3}
+                    {renderQuestionLabel('chairAnswer3')}
                   </label>
                   <textarea
                     name="chairAnswer3"
@@ -811,7 +820,7 @@ const ApplicationForm = ({
               )}
            <div className={!hasQuestion('chairAnswer2') ? 'hidden' : ''}>
                 <label className="block text-white text-sm font-medium mb-2">
-                  {questions.chairAnswer2}
+                  {renderQuestionLabel('chairAnswer2')}
                 </label>
                 <textarea
                   name="chairAnswer2"
@@ -825,7 +834,7 @@ const ApplicationForm = ({
           ) : (
             <div className={!hasQuestion('englishLevel') ? 'hidden' : ''}>
               <label className="block text-white text-sm font-medium mb-2">
-                {questions.englishLevel}
+                {renderQuestionLabel('englishLevel')}
               </label>
               <select
                 name="englishLevel"
@@ -849,7 +858,7 @@ const ApplicationForm = ({
       {applicationType === 'press' && (
         <div className={!hasQuestion('camera') ? 'hidden' : ''}>
           <label className="block text-white text-sm font-medium mb-2">
-            {questions.camera}
+            {renderQuestionLabel('camera')}
           </label>
           <input
             name="camera"
@@ -862,7 +871,7 @@ const ApplicationForm = ({
 
       <div className={!hasQuestion('dietaryPreferences') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
-          {questions.dietaryPreferences}
+          {renderQuestionLabel('dietaryPreferences')}
         </label>
         <select
           name="dietaryPreferences"
@@ -881,7 +890,7 @@ const ApplicationForm = ({
 
       <div className={!hasQuestion('additionalInfo') ? 'hidden' : ''}>
         <label className="block text-white text-sm font-medium mb-2">
-          {questions.additionalInfo}
+          {renderQuestionLabel('additionalInfo')}
         </label>
         <textarea
           name="additionalInfo"
@@ -916,7 +925,7 @@ const ApplicationForm = ({
             {applicationType === 'delegation' && (
               <div className={!hasQuestion('numberOfDelegates') ? 'hidden' : 'mt-6'}>
                 <label className="block text-white text-sm font-medium mb-2">
-                  {formatQuestionText(questions.numberOfDelegates)}
+                  {renderQuestionLabel('numberOfDelegates')}
                 </label>
                 <input
                   type="number"
@@ -959,6 +968,8 @@ const ApplicationForm = ({
                     {questions.delegate ? `${questions.delegate} #${i + 1}` : `Delegate #${i + 1}`}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={!hasQuestion('delegateFullName') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateFullName')}</label>
                     <input
                       placeholder={questions.delegateFullName}
                       value={d.fullName}
@@ -972,6 +983,9 @@ const ApplicationForm = ({
                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateFullName') ? 'hidden' : ''}`}
                        required={hasQuestion('delegateFullName')}
                     />
+                    </div>
+                    <div className={!hasQuestion('delegateEmail') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEmail')}</label>
                     <input
                       placeholder={questions.delegateEmail}
                       type="email"
@@ -986,6 +1000,9 @@ const ApplicationForm = ({
                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEmail') ? 'hidden' : ''}`}
                        required={hasQuestion('delegateEmail')}
                     />
+                    </div>
+                    <div className={!hasQuestion('delegatePhoneNumber') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegatePhoneNumber')}</label>
                     <input
                       placeholder={questions.delegatePhoneNumber}
                       type="tel"
@@ -1000,6 +1017,9 @@ const ApplicationForm = ({
                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegatePhoneNumber') ? 'hidden' : ''}`}
                        required={hasQuestion('delegatePhoneNumber')}
                     />
+                    </div>
+                    <div className={!hasQuestion('delegateNationalId') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateNationalId')}</label>
                     <input
                       placeholder={questions.delegateNationalId}
                       value={d.nationalId}
@@ -1013,6 +1033,9 @@ const ApplicationForm = ({
                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateNationalId') ? 'hidden' : ''}`}
                        required={hasQuestion('delegateNationalId')}
                     />
+                    </div>
+                    <div className={!hasQuestion('delegateBirthDate') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateBirthDate')}</label>
                     <input
                       placeholder={questions.delegateBirthDate}
                       type="date"
@@ -1027,7 +1050,10 @@ const ApplicationForm = ({
                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateBirthDate') ? 'hidden' : ''}`}
                        required={hasQuestion('delegateBirthDate')}
                     />
+                    </div>
 
+                    <div className={!hasQuestion('delegateGender') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGender')}</label>
                     <select
                       value={d.gender}
                       onChange={(e) =>
@@ -1047,6 +1073,9 @@ const ApplicationForm = ({
                         </option>
                       ))}
                     </select>
+                    </div>
+                    <div className={!hasQuestion('delegateGrade') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGrade')}</label>
                     <select
                       value={d.grade}
                       onChange={(e) =>
@@ -1066,10 +1095,12 @@ const ApplicationForm = ({
                         </option>
                       ))}
                     </select>
+                    </div>
                     <div className={`md:col-span-2 space-y-2 ${!hasCommitteeChoices ? 'hidden' : ''}`}>
                       {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
+                        <label key={idx} className="block text-white text-sm font-medium">
+                          {renderQuestionLabel(`choice${idx + 1}`, `${idx + 1}. Choice`)}
                         <select
-                          key={idx}
                           value={
                             d.committeePreferences[idx]
                           }
@@ -1092,8 +1123,11 @@ const ApplicationForm = ({
                             </option>
                           ))}
                         </select>
+                        </label>
                       ))}
                     </div>
+                    <div className={!hasQuestion('delegateEnglishLevel') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEnglishLevel')}</label>
                     <select
                       value={d.englishLevel}
                       onChange={(e) =>
@@ -1106,13 +1140,16 @@ const ApplicationForm = ({
                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEnglishLevel') ? 'hidden' : ''}`}
                       required={hasQuestion('delegateEnglishLevel')}
                     >
-                      <option value="">{questions.delegateEnglishLevel}</option>
+                      <option value="">{FORM.placeholders.selectEnglishLevel}</option>
                       {englishOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
                       ))}
                     </select>
+                    </div>
+                    <div className={!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateDietaryPreferences')}</label>
                     <select
                       value={d.dietaryPreferences}
                       onChange={(e) =>
@@ -1124,15 +1161,17 @@ const ApplicationForm = ({
                       }
                       className={`${!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''} w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all`}
                     >
-                      <option value="">{questions.delegateDietaryPreferences}</option>
+                      <option value="">{FORM.messages.selectNone}</option>
                       {dietaryOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
                       ))}
                     </select>
+                    </div>
 
                      <div className={`md:col-span-2 ${!hasQuestion('delegateExperience') ? 'hidden' : ''}`}>
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateExperience')}</label>
                       <textarea
                         placeholder={questions.delegateExperience}
                         value={d.experience}
@@ -1149,7 +1188,7 @@ const ApplicationForm = ({
                     </div>
                      <div className={`md:col-span-2 ${!hasQuestion('delegateMotivationLetter') ? 'hidden' : ''}`}>
                       <label className="block text-white text-sm font-medium mb-1">
-                        {formatQuestionText(questions.delegateMotivationLetter)}
+                        {renderQuestionLabel('delegateMotivationLetter')}
                       </label>
                       <textarea
                         placeholder={getQuestion('delegateMotivationLetter')?.placeholder || undefined}
@@ -1176,7 +1215,10 @@ const ApplicationForm = ({
                         {minimumWordsFor('delegateMotivationLetter') > 0 && `${getWordCount(d.motivationLetter)} / ${minimumWordsFor('delegateMotivationLetter')} words`}
                       </p>}
                     </div>
+                    <div className={`md:col-span-2 ${!hasQuestion('delegateAdditionalInfo') ? 'hidden' : ''}`}>
+                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateAdditionalInfo')}</label>
                     <textarea
+                      aria-label={questions.delegateAdditionalInfo}
                       placeholder={questions.delegateAdditionalInfo}
                       value={d.additionalInfo}
                       onChange={(e) =>
@@ -1186,9 +1228,10 @@ const ApplicationForm = ({
                           e.target.value
                         )
                       }
-                       className={`md:col-span-2 w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateAdditionalInfo') ? 'hidden' : ''}`}
+                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
                       rows={2}
                     />
+                    </div>
                   </div>
                 </div>
               ))}

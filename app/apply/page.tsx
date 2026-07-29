@@ -2,7 +2,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ClipboardCheck, Globe2, Landmark, Newspaper, Star, type LucideIcon } from 'lucide-react';
+import { Camera, ClipboardCheck, Globe2, Landmark, Star, type LucideIcon } from 'lucide-react';
 import { COPY, formatConferenceText } from '@/lib/conference';
 import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
 
@@ -39,11 +39,11 @@ const APPLICATION_ICONS: Record<string, LucideIcon> = {
   delegate: Globe2,
   admin: ClipboardCheck,
   chair: Star,
-  press: Newspaper,
+  press: Camera,
 };
 
 function ApplicationIcon({ type }: { type: string }) {
-  const Icon = APPLICATION_ICONS[type] ?? Newspaper;
+  const Icon = APPLICATION_ICONS[type] ?? Camera;
   return <Icon size={28} strokeWidth={1.8} aria-hidden="true" />;
 }
 

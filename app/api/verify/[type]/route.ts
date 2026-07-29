@@ -150,9 +150,7 @@ export async function POST(
       if (!text) return null;
       const minimumWords = question.minWords > 0
         ? question.minWords
-        : question.id === 'motivationLetter' || question.id === 'delegateMotivationLetter'
-          ? settings.form.minimumMotivationWords
-          : 0;
+        : 0;
       if (question.minCharacters > 0 && text.length < question.minCharacters) {
         return `${question.label} must be at least ${question.minCharacters} characters.`;
       }
