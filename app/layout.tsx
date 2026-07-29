@@ -98,6 +98,13 @@ export default async function RootLayout({
           "--color-warm": THEME.warm,
         } as CSSProperties}
       >
+        <div
+          aria-hidden="true"
+          className="fixed top-0 left-0 z-[-1] h-[1200px] w-full pointer-events-none"
+          style={{
+            background: `linear-gradient(180deg, ${THEME.background} 0%, ${THEME.middle} 48%, ${THEME.warm} 100%)`,
+          }}
+        />
         <BackgroundAnimations />
 
         <div className="min-h-screen relative z-10">

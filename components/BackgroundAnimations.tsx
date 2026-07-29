@@ -4,7 +4,7 @@ const BackgroundAnimations = () => {
   return (
     <div
       className="pixel-field fixed inset-x-0 top-0 bottom-auto overflow-hidden pointer-events-none z-0"
-      style={{ height: "900px" }}
+      style={{ height: "1200px" }}
       aria-hidden="true"
     >
       <div className="sonmun-line-field absolute inset-0">
