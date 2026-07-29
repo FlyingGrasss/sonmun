@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
   --background: #000;
@@ -22,6 +23,17 @@ body {
   color: var(--foreground);
 }
 
+select option {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+select option:checked,
+select option:hover {
+  background-color: var(--color-middle);
+  color: var(--foreground);
+}
+
 .conference-title,
 .conference-brand {
   color: var(--color-highlight);
@@ -34,7 +46,7 @@ body {
 .sonmun-line {
   position: absolute;
   left: 50%;
-  bottom: -15vh;
+  bottom: calc(-15vh + 300px);
   width: 220vw;
   height: 118vh;
   border: 1px solid color-mix(in srgb, var(--color-pattern-strong) 60%, transparent);
@@ -44,72 +56,72 @@ body {
 }
 
 .sonmun-line-1 {
-  bottom: -15vh;
+  bottom: calc(-15vh + 300px);
   opacity: 0.22;
 }
 
 .sonmun-line-2 {
-  bottom: -22vh;
+  bottom: calc(-22vh + 300px);
   opacity: 0.24;
 }
 
 .sonmun-line-3 {
-  bottom: -29vh;
+  bottom: calc(-29vh + 300px);
   opacity: 0.26;
 }
 
 .sonmun-line-4 {
-  bottom: -36vh;
+  bottom: calc(-36vh + 300px);
   opacity: 0.28;
 }
 
 .sonmun-line-5 {
-  bottom: -43vh;
+  bottom: calc(-43vh + 300px);
   opacity: 0.3;
 }
 
 .sonmun-line-6 {
-  bottom: -50vh;
+  bottom: calc(-50vh + 300px);
   opacity: 0.32;
 }
 
 .sonmun-line-7 {
-  bottom: -57vh;
+  bottom: calc(-57vh + 300px);
   opacity: 0.34;
 }
 
 .sonmun-line-8 {
-  bottom: -64vh;
+  bottom: calc(-64vh + 300px);
   opacity: 0.34;
 }
 
 .sonmun-line-9 {
-  bottom: -71vh;
+  bottom: calc(-71vh + 300px);
   opacity: 0.32;
 }
 
 .sonmun-line-10 {
-  bottom: -78vh;
+  bottom: calc(-78vh + 300px);
   opacity: 0.3;
 }
 
 .sonmun-line-11 {
-  bottom: -85vh;
+  bottom: calc(-85vh + 300px);
   opacity: 0.28;
 }
 
 .sonmun-line-12 {
-  bottom: -92vh;
+  bottom: calc(-92vh + 300px);
   opacity: 0.26;
 }
 
 .sonmun-line-13 {
-  bottom: -99vh;
+  bottom: calc(-99vh + 300px);
   opacity: 0.24;
 }
 
 .sonmun-line-14 {
-  bottom: -106vh;
+  bottom: calc(-106vh + 300px);
   opacity: 0.22;
 }
 
@@ -117,63 +129,63 @@ body {
   .sonmun-line {
     width: 300vw;
     height: 132vh;
-    bottom: -8vh;
+    bottom: calc(-8vh + 300px);
   }
 
   .sonmun-line-1 {
-    bottom: -8vh;
+    bottom: calc(-8vh + 300px);
   }
 
   .sonmun-line-2 {
-    bottom: -15vh;
+    bottom: calc(-15vh + 300px);
   }
 
   .sonmun-line-3 {
-    bottom: -22vh;
+    bottom: calc(-22vh + 300px);
   }
 
   .sonmun-line-4 {
-    bottom: -29vh;
+    bottom: calc(-29vh + 300px);
   }
 
   .sonmun-line-5 {
-    bottom: -36vh;
+    bottom: calc(-36vh + 300px);
   }
 
   .sonmun-line-6 {
-    bottom: -43vh;
+    bottom: calc(-43vh + 300px);
   }
 
   .sonmun-line-7 {
-    bottom: -50vh;
+    bottom: calc(-50vh + 300px);
   }
 
   .sonmun-line-8 {
-    bottom: -57vh;
+    bottom: calc(-57vh + 300px);
   }
 
   .sonmun-line-9 {
-    bottom: -64vh;
+    bottom: calc(-64vh + 300px);
   }
 
   .sonmun-line-10 {
-    bottom: -71vh;
+    bottom: calc(-71vh + 300px);
   }
 
   .sonmun-line-11 {
-    bottom: -78vh;
+    bottom: calc(-78vh + 300px);
   }
 
   .sonmun-line-12 {
-    bottom: -85vh;
+    bottom: calc(-85vh + 300px);
   }
 
   .sonmun-line-13 {
-    bottom: -92vh;
+    bottom: calc(-92vh + 300px);
   }
 
   .sonmun-line-14 {
-    bottom: -99vh;
+    bottom: calc(-99vh + 300px);
   }
 }
 

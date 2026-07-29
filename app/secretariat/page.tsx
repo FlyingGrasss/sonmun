@@ -3,27 +3,29 @@
 export const revalidate = 60;
 
 import SecretariatCard from "@/components/SecretariatCard";
-import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
+import { COPY, formatConferenceText } from "@/lib/conference";
 import { getPublishedSecretariat } from "@/lib/content";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const allSecretariat = await getPublishedSecretariat();
+  const { conference } = await getSiteSettings();
   const names = allSecretariat.map(member => member.name).join(', ');
   const description = formatConferenceText(COPY.metadata.secretariatDescription, {
-    shortName: CONFERENCE.shortName,
+    shortName: conference.shortName,
   });
 
   return {
     title: `Secretariat`,
     description: description,
-    keywords: [CONFERENCE.shortName, "Secretariat", names],
+    alternates: { canonical: "/secretariat" },
+    keywords: [conference.shortName, "Secretariat", names],
     openGraph: {
       title: `Secretariat`,
       description: description,
-      url: `${CONFERENCE.siteUrl}/secretariat`,
+      url: `${normalizeSiteUrl(conference.siteUrl)}/secretariat`,
     },
   };
 };

@@ -1,4 +1,5 @@
 import conferenceConfig from "@/config/conference.json";
+import { normalizeQuestionGroups } from "@/lib/questions";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? conferenceConfig.conference.siteUrl;
 
@@ -12,14 +13,10 @@ export const ASSETS = conferenceConfig.assets;
 export const APPLICATIONS = conferenceConfig.applications;
 export const FORM = conferenceConfig.form;
 export const COPY = conferenceConfig.copy;
+const CONFIG_QUESTIONS = normalizeQuestionGroups(conferenceConfig.form.questions, conferenceConfig.form);
 
 export function getApplicationQuestions(type: string) {
-  const questions = conferenceConfig.form.questions as Record<
-    string,
-    Record<string, string>
-  >;
-
-  return questions[type] ?? questions.delegate;
+  return CONFIG_QUESTIONS[type] ?? CONFIG_QUESTIONS.delegate;
 }
 
 export function formatConferenceText(

@@ -1,5 +1,6 @@
 import conferenceConfig from "@/config/conference.json";
 import { prisma } from "@/lib/prisma";
+import { normalizeQuestionGroups, type QuestionGroups } from "@/lib/questions";
 
 export type EditableApplication = {
   id: string;
@@ -23,6 +24,8 @@ export type EditableSettings = {
     year: number;
     hashtag: string;
     siteUrl: string;
+    keywords: string[];
+    locale: string;
     location: {
       city: string;
       country: string;
@@ -43,7 +46,7 @@ export type EditableSettings = {
     committeesEnabled: boolean;
     secretariatEnabled: boolean;
   };
-  questions: Record<string, Record<string, string>>;
+  questions: QuestionGroups;
   letters: {
     titlePrefix: string;
     titleHighlight: string;
@@ -53,6 +56,18 @@ export type EditableSettings = {
 };
 
 const config = conferenceConfig as typeof conferenceConfig;
+
+export function normalizeSiteUrl(value: string, fallback = config.conference.siteUrl) {
+  const candidate = value.trim();
+  if (!candidate) return fallback;
+
+  try {
+    const url = new URL(candidate.includes("://") ? candidate : `https://${candidate}`);
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return fallback;
+  }
+}
 
 export const fallbackSettings: EditableSettings = {
   conference: {
@@ -66,7 +81,9 @@ export const fallbackSettings: EditableSettings = {
     startDateIso: config.conference.startDateIso,
     year: config.conference.year,
     hashtag: config.conference.hashtag,
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? config.conference.siteUrl,
+    siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? config.conference.siteUrl),
+    keywords: [...config.conference.keywords],
+    locale: config.conference.locale,
     location: { ...config.conference.location },
     organizer: { ...config.conference.organizer },
   },
@@ -80,12 +97,7 @@ export const fallbackSettings: EditableSettings = {
     committeesEnabled: true,
     secretariatEnabled: true,
   },
-  questions: Object.fromEntries(
-    Object.entries(config.form.questions).map(([type, questions]) => [
-      type,
-      { ...questions },
-    ])
-  ),
+  questions: normalizeQuestionGroups(config.form.questions, config.form),
   letters: {
     titlePrefix: config.copy.letters.titlePrefix,
     titleHighlight: config.copy.letters.titleHighlight,
@@ -113,7 +125,7 @@ function mergeSettings(value: unknown): EditableSettings {
           ...application,
         }))
     : fallbackSettings.applications;
-  const questions = isRecord(value.questions) ? value.questions : {};
+  const savedQuestions = isRecord(value.questions) ? value.questions : null;
   const letters = isRecord(value.letters) ? value.letters : {};
   const form = isRecord(value.form) ? value.form : {};
   const pages = isRecord(value.pages) ? value.pages : {};
@@ -122,6 +134,7 @@ function mergeSettings(value: unknown): EditableSettings {
     conference: {
       ...fallbackSettings.conference,
       ...conference,
+      siteUrl: normalizeSiteUrl(String(conference.siteUrl ?? fallbackSettings.conference.siteUrl), fallbackSettings.conference.siteUrl),
       location: { ...fallbackSettings.conference.location, ...location },
       organizer: { ...fallbackSettings.conference.organizer, ...organizer },
     } as EditableSettings["conference"],
@@ -137,15 +150,15 @@ function mergeSettings(value: unknown): EditableSettings {
       ...fallbackSettings.pages,
       ...pages,
     } as EditableSettings["pages"],
-    questions: Object.fromEntries(
-      Object.entries(fallbackSettings.questions).map(([type, defaults]) => [
-        type,
-        {
-          ...defaults,
-          ...(isRecord(questions[type]) ? questions[type] : {}),
-        },
-      ])
-    ) as Record<string, Record<string, string>>,
+    questions: normalizeQuestionGroups(
+      savedQuestions ?? config.form.questions,
+      {
+        minimumMotivationWords: Number(form.minimumMotivationWords ?? fallbackSettings.form.minimumMotivationWords),
+        minimumDelegates: Number(form.minimumDelegates ?? fallbackSettings.form.minimumDelegates),
+        committeePreferenceCount: Number(form.committeePreferenceCount ?? fallbackSettings.form.committeePreferenceCount),
+      },
+      config.form.questions
+    ),
     letters: {
       ...fallbackSettings.letters,
       ...letters,

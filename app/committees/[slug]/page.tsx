@@ -5,7 +5,7 @@ import RichText from "@/components/RichText";
 import { getPublishedCommittee, getPublishedCommittees } from "@/lib/content";
 import { notFound } from "next/navigation";
 import { COPY, formatConferenceText } from "@/lib/conference";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -20,15 +20,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const committee = await getPublishedCommittee(slug);
   
   if (!committee) return {};
+
+  const { conference } = await getSiteSettings();
+  const siteUrl = normalizeSiteUrl(conference.siteUrl);
   
   return {
     title: committee.name,
     description: formatConferenceText(COPY.metadata.committeeDetailDescription, {
       committeeName: committee.name,
     }),
+    alternates: { canonical: `/committees/${committee.slug}` },
     openGraph: {
       title: committee.name,
-      images: [committee.imageUrl],
+      url: `${siteUrl}/committees/${committee.slug}`,
+      images: [{ url: committee.imageUrl, alt: `${committee.name} committee` }],
     },
   };
 }

@@ -1,13 +1,14 @@
-import { CONFERENCE } from "@/lib/conference";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 import type { MetadataRoute } from "next";
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const settings = await getSiteSettings();
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/admin",
+      disallow: ["/admin", "/api/"],
     },
-    sitemap: `${CONFERENCE.siteUrl}/sitemap.xml`,
+    sitemap: `${normalizeSiteUrl(settings.conference.siteUrl)}/sitemap.xml`,
   };
 }

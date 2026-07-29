@@ -4,8 +4,8 @@ import { clearAdminSession, setAdminSession, assertAdminPassword, requireAdmin }
 import { parseDocuments } from "@/lib/documents";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
-import { fallbackSettings, type EditableSettings } from "@/lib/siteSettings";
-import { questionTextFromEditor } from "@/lib/questionText";
+import { getSiteSettings, normalizeSiteUrl, type EditableSettings } from "@/lib/siteSettings";
+import { normalizeQuestionDefinition, type QuestionDefinition, type QuestionType } from "@/lib/questions";
 import { deleteAdminImage } from "@/lib/adminUpload";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -65,6 +65,8 @@ export async function updateCommitteeAction(id: number, formData: FormData) {
   await requireAdmin();
   const name = stringValue(formData, "name");
   const slug = stringValue(formData, "slug") || slugify(name);
+  const imageUrl = stringValue(formData, "imageUrl");
+  const previous = await prisma.committee.findUnique({ where: { id }, select: { imageUrl: true } });
 
   await prisma.committee.update({
     where: { id },
@@ -72,12 +74,13 @@ export async function updateCommitteeAction(id: number, formData: FormData) {
       name,
       slug,
       sortOrder: intValue(formData, "sortOrder"),
-      imageUrl: stringValue(formData, "imageUrl"),
+      imageUrl,
       description: stringValue(formData, "description"),
       documents: parseDocuments(formData.get("documents")),
       isPublished: checkboxValue(formData, "isPublished"),
     },
   });
+  if (previous?.imageUrl !== imageUrl) await deleteAdminImage(previous?.imageUrl);
 
   revalidatePath("/committees");
   redirect("/admin");
@@ -118,6 +121,8 @@ export async function updateSecretariatAction(id: number, formData: FormData) {
   await requireAdmin();
   const name = stringValue(formData, "name");
   const slug = stringValue(formData, "slug") || slugify(name);
+  const imageUrl = stringValue(formData, "imageUrl");
+  const previous = await prisma.secretariatMember.findUnique({ where: { id }, select: { imageUrl: true } });
 
   await prisma.secretariatMember.update({
     where: { id },
@@ -126,12 +131,13 @@ export async function updateSecretariatAction(id: number, formData: FormData) {
       slug,
       role: stringValue(formData, "role"),
       sortOrder: intValue(formData, "sortOrder"),
-      imageUrl: stringValue(formData, "imageUrl"),
+      imageUrl,
       bio: stringValue(formData, "bio"),
       instagram: stringValue(formData, "instagram") || null,
       isPublished: checkboxValue(formData, "isPublished"),
     },
   });
+  if (previous?.imageUrl !== imageUrl) await deleteAdminImage(previous?.imageUrl);
 
   revalidatePath("/secretariat");
   redirect("/admin");
@@ -149,7 +155,7 @@ export async function deleteSecretariatAction(id: number) {
 export async function saveConferenceSettingsAction(formData: FormData) {
   await requireAdmin();
 
-  const settings = JSON.parse(JSON.stringify(fallbackSettings)) as EditableSettings;
+  const settings = JSON.parse(JSON.stringify(await getSiteSettings())) as EditableSettings;
   const conference = settings.conference;
 
   conference.brandName = stringValue(formData, "brandName");
@@ -161,14 +167,13 @@ export async function saveConferenceSettingsAction(formData: FormData) {
   conference.startDateIso = stringValue(formData, "startDateIso");
   conference.year = intValue(formData, "year");
   conference.hashtag = stringValue(formData, "hashtag");
-  conference.siteUrl = stringValue(formData, "siteUrl");
+  conference.siteUrl = normalizeSiteUrl(stringValue(formData, "siteUrl"), conference.siteUrl);
   conference.location.city = stringValue(formData, "locationCity");
   conference.location.country = stringValue(formData, "locationCountry");
   conference.organizer.name = stringValue(formData, "organizerName");
+  settings.form.minimumMotivationWords = Math.max(0, intValue(formData, "minimumMotivationWords"));
+  settings.form.minimumDelegates = Math.max(1, intValue(formData, "minimumDelegates"));
 
-  settings.form.minimumMotivationWords = intValue(formData, "minimumMotivationWords");
-  settings.form.minimumDelegates = intValue(formData, "minimumDelegates");
-  settings.form.committeePreferenceCount = intValue(formData, "committeePreferenceCount");
   settings.pages.committeesEnabled = checkboxValue(formData, "committeesEnabled");
   settings.pages.secretariatEnabled = checkboxValue(formData, "secretariatEnabled");
 
@@ -180,23 +185,34 @@ export async function saveConferenceSettingsAction(formData: FormData) {
   }
 
   for (const type of Object.keys(settings.questions)) {
-    const questions: Record<string, string> = {};
+    const questions: QuestionDefinition[] = [];
     const count = intValue(formData, `question_${type}_count`);
     for (let index = 0; index < count; index += 1) {
-      const key = stringValue(formData, `question_${type}_${index}_key`).replace(/[^a-zA-Z0-9_]/g, "");
-      const text = questionTextFromEditor(stringValue(formData, `question_${type}_${index}_text`));
-      if (key && text) questions[key] = text;
+      const id = stringValue(formData, `question_${type}_${index}_id`).replace(/[^a-zA-Z0-9_]/g, "");
+      const label = stringValue(formData, `question_${type}_${index}_label`);
+      if (!id || !label) continue;
+      questions.push(normalizeQuestionDefinition({
+        id,
+        label,
+        type: stringValue(formData, `question_${type}_${index}_type`) as QuestionType,
+        required: checkboxValue(formData, `question_${type}_${index}_required`),
+        placeholder: stringValue(formData, `question_${type}_${index}_placeholder`),
+        options: stringValue(formData, `question_${type}_${index}_options`).split(/\r?\n/).map((option) => option.trim()).filter(Boolean),
+        minWords: Math.max(0, intValue(formData, `question_${type}_${index}_minWords`)),
+        minCharacters: Math.max(0, intValue(formData, `question_${type}_${index}_minCharacters`)),
+      }, id, settings.form));
     }
     settings.questions[type] = questions;
   }
 
   settings.letters.titlePrefix = stringValue(formData, "lettersTitlePrefix");
   settings.letters.titleHighlight = stringValue(formData, "lettersTitleHighlight");
-  settings.letters.opening = stringValue(formData, "lettersOpening");
-  settings.letters.paragraphs = stringValue(formData, "lettersParagraphs")
+  const letterParts = stringValue(formData, "lettersContent")
     .split(/\r?\n\s*\r?\n/)
-    .map((paragraph) => paragraph.trim())
+    .map((part) => part.trim())
     .filter(Boolean);
+  settings.letters.opening = letterParts.shift() ?? "";
+  settings.letters.paragraphs = letterParts;
 
   await prisma.conferenceSettings.upsert({
     where: { id: 1 },
@@ -214,5 +230,5 @@ export async function saveConferenceSettingsAction(formData: FormData) {
     revalidatePath(`/apply/${application.id}`);
   }
 
-  redirect("/admin");
+  return { ok: true };
 }

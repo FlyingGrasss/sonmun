@@ -4,27 +4,29 @@ export const revalidate = 12000;
 
 import CommitteeCard from "@/components/CommitteeCard";
 import { getPublishedCommittees } from "@/lib/content";
-import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { COPY, formatConferenceText } from "@/lib/conference";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const allCommittees = await getPublishedCommittees();
+  const { conference } = await getSiteSettings();
   const committeeNames = allCommittees.map(committee => committee.name).join(', ');
   const description = formatConferenceText(COPY.metadata.committeesDescription, {
-    shortName: CONFERENCE.shortName,
+    shortName: conference.shortName,
     committeeNames,
   });
 
   return {
     title: `Committees`,
     description: description,
-    keywords: [CONFERENCE.shortName, "Committees", committeeNames, "MUN"],
+    alternates: { canonical: "/committees" },
+    keywords: [conference.shortName, "Committees", committeeNames, "MUN"],
     openGraph: {
       title: `Committees`,
       description: description,
-      url: `${CONFERENCE.siteUrl}/committees`,
+      url: `${normalizeSiteUrl(conference.siteUrl)}/committees`,
     },
     twitter: {
       title: `Committees`,

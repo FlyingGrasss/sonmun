@@ -2,7 +2,7 @@
 
 import type { Metadata } from 'next';
 import { COPY, formatConferenceText } from '@/lib/conference';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
 
 type Props = {
   params: Promise<{ applicationType: string }>
@@ -20,9 +20,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type,
       shortName: settings.conference.shortName,
     }),
+    alternates: { canonical: `/apply/${applicationType}` },
     openGraph: {
       title: `Apply ${type}`,
-      url: `${settings.conference.siteUrl}/apply/${applicationType}`,
+      url: `${normalizeSiteUrl(settings.conference.siteUrl)}/apply/${applicationType}`,
     },
   };
 }

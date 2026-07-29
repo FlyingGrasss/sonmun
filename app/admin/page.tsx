@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logoutAction, createCommitteeAction, createSecretariatAction, saveConferenceSettingsAction } from "@/app/admin/actions";
 import AdminSettingsForm from "@/components/admin/AdminSettingsForm";
 import ImageUrlField from "@/components/admin/ImageUrlField";
+import NameAndSlugFields from "@/components/admin/NameAndSlugFields";
 import { CONFERENCE } from "@/lib/conference";
 import { requireAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/prisma";
@@ -80,9 +81,6 @@ export default async function AdminPage() {
             <h1 className="text-4xl font-bold">Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="#conference-settings" className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
-              Conference Settings
-            </Link>
             <form action={logoutAction}>
               <button className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
                 Logout
@@ -133,8 +131,7 @@ export default async function AdminPage() {
           <form action={createCommitteeAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
             <h2 className="text-2xl font-bold">New Committee</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Name" name="name" required />
-              <Field label="Link" name="slug" />
+              <NameAndSlugFields basePath="/committees" />
               <Field label="Sort Order" name="sortOrder" type="number" />
               <ImageUrlField name="imageUrl" id="committee-image-url" required />
             </div>
@@ -152,8 +149,7 @@ export default async function AdminPage() {
           <form action={createSecretariatAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
             <h2 className="text-2xl font-bold">New Secretariat Member</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Name" name="name" required />
-              <Field label="Link" name="slug" />
+              <NameAndSlugFields basePath="/secretariat" />
               <Field label="Role" name="role" required />
               <Field label="Sort Order" name="sortOrder" type="number" />
               <ImageUrlField name="imageUrl" id="secretariat-image-url" required />

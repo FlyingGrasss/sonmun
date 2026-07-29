@@ -10,6 +10,7 @@ import {
   FORM,
   formatConferenceText,
 } from '@/lib/conference';
+import { questionById, type QuestionDefinition } from '@/lib/questions';
 import type { EditableSettings } from '@/lib/siteSettings';
 
 // --- Interfaces ---
@@ -101,8 +102,27 @@ const ApplicationForm = ({
   applicationType: string;
   settings: EditableSettings;
 }) => {
-  const questions = settings.questions[applicationType] ?? settings.questions.delegate;
+  const questionDefinitions = settings.questions[applicationType] ?? settings.questions.delegate ?? [];
+  const questions = Object.fromEntries(
+    questionDefinitions.map((question) => [question.id, question.label])
+  ) as Record<string, string>;
+  const getQuestion = (key: string): QuestionDefinition | undefined => questionById(questionDefinitions, key);
+  const getOptions = (id: string, fallback: { value: string }[]) => {
+    const options = getQuestion(id)?.options ?? [];
+    return options.length > 0 ? options : fallback.map((option) => option.value);
+  };
+  const genderOptions = getOptions(applicationType === 'delegation' ? 'delegateGender' : 'gender', FORM.options.gender);
+  const gradeOptions = getOptions(applicationType === 'delegation' ? 'delegateGrade' : 'grade', FORM.options.grade);
+  const englishOptions = getOptions(applicationType === 'delegation' ? 'delegateEnglishLevel' : 'englishLevel', FORM.options.englishLevel);
+  const dietaryOptions = getOptions(applicationType === 'delegation' ? 'delegateDietaryPreferences' : 'dietaryPreferences', FORM.options.dietaryPreferences);
   const rules = settings.form;
+  const minimumWordsFor = (id: string) => {
+    const questionMinimum = getQuestion(id)?.minWords ?? 0;
+    if (questionMinimum > 0) return questionMinimum;
+    return id === 'motivationLetter' || id === 'delegateMotivationLetter'
+      ? rules.minimumMotivationWords
+      : 0;
+  };
   const formatQuestionText = (value: string, extra: Record<string, string | number> = {}) =>
     formatConferenceText(value, {
       minimumMotivationWords: rules.minimumMotivationWords,
@@ -220,25 +240,24 @@ const ApplicationForm = ({
   };
 
   const handleCommitteeChange = (index: number, value: string) => {
+    const nextPreferences = formData.committeePreferences.map((preference, preferenceIndex) =>
+      preferenceIndex === index ? value : preference
+    );
     setFormData((prev) => ({
       ...prev,
-      committeePreferences: prev.committeePreferences.map((preference, preferenceIndex) =>
-        preferenceIndex === index ? value : preference
-      ),
+      committeePreferences: nextPreferences,
+      customAnswers: {
+        ...prev.customAnswers,
+        ...(applicationType !== 'delegation' && !nextPreferences.includes('FKK: Muhteşem Yüzyıl')
+          ? { magnificentCenturyKnowledge: '' }
+          : {}),
+      },
       ...(applicationType === 'chair' &&
-      !hasGeneralAssemblyCommittee(
-        prev.committeePreferences.map((preference, preferenceIndex) =>
-          preferenceIndex === index ? value : preference
-        )
-      )
+      !hasGeneralAssemblyCommittee(nextPreferences)
         ? { chairAnswer1: '' }
         : {}),
       ...(applicationType === 'chair' &&
-      !hasCrisisCommittee(
-        prev.committeePreferences.map((preference, preferenceIndex) =>
-          preferenceIndex === index ? value : preference
-        )
-      )
+      !hasCrisisCommittee(nextPreferences)
         ? { chairAnswer3: '' }
         : {})
     }));
@@ -317,12 +336,30 @@ const ApplicationForm = ({
     setMainPageMessage({ text: '', isError: false }); // Clear main page message
     setModalMessage({ text: '', isError: false }); // Clear modal message
 
+    for (const question of questionDefinitions) {
+      const value = formData.customAnswers[question.id]?.trim() ?? '';
+      if (!value) continue;
+      if (question.minCharacters > 0 && value.length < question.minCharacters) {
+        setMainPageMessage({ text: `${question.label} must be at least ${question.minCharacters} characters.`, isError: true });
+        setIsSubmitting(false);
+        window.scrollTo(0, 0);
+        return;
+      }
+      if (question.minWords > 0 && getWordCount(value) < question.minWords) {
+        setMainPageMessage({ text: `${question.label} must be at least ${question.minWords} words.`, isError: true });
+        setIsSubmitting(false);
+        window.scrollTo(0, 0);
+        return;
+      }
+    }
+
     // Explicit Chair Validation for Word Count
     // Word Count Validation
     if (applicationType !== 'delegation' && hasQuestion('motivationLetter')) {
-      if (getWordCount(formData.motivationLetter) < rules.minimumMotivationWords) {
+      const minimumWords = minimumWordsFor('motivationLetter');
+      if (minimumWords > 0 && getWordCount(formData.motivationLetter) < minimumWords) {
         setMainPageMessage({
-          text: formatQuestionText(FORM.messages.motivationTooShort),
+          text: formatQuestionText(FORM.messages.motivationTooShort, { minimumMotivationWords: minimumWords }),
           isError: true
         });
         setIsSubmitting(false);
@@ -331,11 +368,13 @@ const ApplicationForm = ({
       }
     } else if (applicationType === 'delegation' && hasQuestion('delegateMotivationLetter')) {
       // Validate all delegates
+      const minimumWords = minimumWordsFor('delegateMotivationLetter');
       for (let i = 0; i < delegates.length; i++) {
-        if (getWordCount(delegates[i].motivationLetter) < rules.minimumMotivationWords) {
+        if (minimumWords > 0 && getWordCount(delegates[i].motivationLetter) < minimumWords) {
           setMainPageMessage({
             text: formatQuestionText(FORM.messages.delegateMotivationTooShort, {
               number: i + 1,
+              minimumMotivationWords: minimumWords,
             }),
             isError: true
           });
@@ -470,25 +509,40 @@ const ApplicationForm = ({
     'delegateDietaryPreferences', 'delegateExperience', 'delegateMotivationLetter', 'delegateMotivationLetterPlaceholder',
     'delegateAdditionalInfo', 'chairAnswer1', 'chairAnswer2', 'chairAnswer3', 'references', 'camera',
   ]);
-  const customQuestions = Object.entries(questions).filter(([key]) => !builtInQuestionKeys.has(key));
-  const hasQuestion = (key: string) => typeof questions[key] === 'string' && questions[key].trim().length > 0;
+  const hasQuestion = (key: string) => Boolean(getQuestion(key)?.label.trim());
+  const shouldShowCustomQuestion = (question: QuestionDefinition) =>
+    question.id !== 'magnificentCenturyKnowledge' ||
+    (applicationType !== 'delegation' && formData.committeePreferences.includes('FKK: Muhteşem Yüzyıl'));
+  const customQuestions = questionDefinitions.filter((question) =>
+    !builtInQuestionKeys.has(question.id) &&
+    !question.id.startsWith('choice') &&
+    question.label.trim().length > 0 &&
+    shouldShowCustomQuestion(question)
+  );
+  const controlClass = "mt-2 w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all";
+  const renderCustomControl = (key: string, question: QuestionDefinition) => {
+    const name = `customQuestion_${key}`;
+    const value = formData.customAnswers[key] ?? '';
+    const onChange = handleInputChange;
+    if (question.type === 'longText') {
+      return <textarea name={name} value={value} onChange={onChange} placeholder={question.placeholder || undefined} rows={4} required={question.required} minLength={question.minCharacters || undefined} className={`${controlClass} resize-none`} />;
+    }
+    if (question.type === 'dropdown') {
+      return <select name={name} value={value} onChange={onChange} required={question.required} className={controlClass}><option value="">{question.placeholder || 'Select an option'}</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
+    }
+    const inputType = question.type === 'date' || question.type === 'number' || question.type === 'phone' ? question.type : 'text';
+    return <input name={name} type={inputType === 'phone' ? 'tel' : inputType} value={value} onChange={onChange} placeholder={question.placeholder || undefined} min={question.id === 'magnificentCenturyKnowledge' ? 0 : undefined} max={question.id === 'magnificentCenturyKnowledge' ? 10 : undefined} minLength={inputType === 'text' || inputType === 'phone' ? question.minCharacters || undefined : undefined} required={question.required} className={controlClass} />;
+  };
   const customQuestionFields = customQuestions.length > 0 ? (
     <div className="space-y-4 md:col-span-2">
-      {customQuestions.map(([key, prompt]) => (
-        <label key={key} className="block text-white text-sm font-medium">
-          {formatQuestionText(prompt)}
-          <textarea
-            name={`customQuestion_${key}`}
-            value={formData.customAnswers[key] ?? ''}
-            onChange={handleInputChange}
-            rows={4}
-            className="mt-2 w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-          />
+      {customQuestions.map((question) => (
+        <label key={question.id} className="block text-white text-sm font-medium">
+          {question.label}
+          {renderCustomControl(question.id, question)}
         </label>
       ))}
     </div>
   ) : null;
-
   const commonFields = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className={!hasQuestion(applicationType === 'delegation' ? 'schoolName' : 'fullName') ? 'hidden' : ''}>
@@ -587,9 +641,9 @@ const ApplicationForm = ({
               required={hasQuestion('gender')}
             >
               <option value="">{FORM.placeholders.selectGender}</option>
-              {FORM.options.gender.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {genderOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
@@ -619,9 +673,9 @@ const ApplicationForm = ({
               required={hasQuestion('grade')}
             >
               <option value="">{FORM.placeholders.selectGrade}</option>
-              {FORM.options.grade.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {gradeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
@@ -639,6 +693,11 @@ const ApplicationForm = ({
       .filter((word) => word.length > 0).length;
   };
 
+  const getChoiceQuestion = (index: number) => getQuestion(`choice${index + 1}`) ?? getQuestion('choice');
+  const hasCommitteeChoices = Array.from({ length: rules.committeePreferenceCount }, (_, index) => getChoiceQuestion(index)).some(Boolean);
+  const firstChoiceQuestion = getChoiceQuestion(0);
+  const committeeOptions = firstChoiceQuestion && firstChoiceQuestion.options.length > 0 ? firstChoiceQuestion.options : COMMITTEES;
+
   const detailFields = (
     <div className="space-y-6">
       <div className={!hasQuestion('motivationLetter') ? 'hidden' : ''}>
@@ -651,17 +710,18 @@ const ApplicationForm = ({
           onChange={handleInputChange}
           rows={5}
           className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+          minLength={getQuestion('motivationLetter')?.minCharacters || undefined}
           required={hasQuestion('motivationLetter')}
         />
-        <p
+        {minimumWordsFor('motivationLetter') > 0 && <p
           className={`text-sm mt-1 text-left ${
-            getWordCount(formData.motivationLetter) >= rules.minimumMotivationWords
+            getWordCount(formData.motivationLetter) >= minimumWordsFor('motivationLetter')
               ? 'text-green-500'
               : 'text-red-500'
           }`}
         >
-          {getWordCount(formData.motivationLetter)} / {rules.minimumMotivationWords} words
-        </p>
+          {minimumWordsFor('motivationLetter') > 0 && `${getWordCount(formData.motivationLetter)} / ${minimumWordsFor('motivationLetter')} words`}
+        </p>}
       </div>
 
       <div className={!hasQuestion('experience') ? 'hidden' : ''}>
@@ -694,10 +754,7 @@ const ApplicationForm = ({
 
       {(applicationType === 'delegate' || applicationType === 'chair') && (
         <>
-          <div className={!hasQuestion('committeePreferences') ? 'hidden' : ''}>
-            <label className="block text-white text-sm font-medium mb-2">
-              {formatQuestionText(questions.committeePreferences)}
-            </label>
+          <div className={!hasCommitteeChoices ? 'hidden' : ''}>
             <div className="space-y-3">
               {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
                 <select
@@ -707,12 +764,12 @@ const ApplicationForm = ({
                     handleCommitteeChange(idx, e.target.value)
                   }
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                  required={idx === 0 && hasQuestion('committeePreferences')}
+                  required={Boolean(getChoiceQuestion(idx)?.required)}
                 >
                   <option value="">
-                    {formatQuestionText(questions.choice, { number: idx + 1 })}
+                    {getChoiceQuestion(idx)?.label || `${idx + 1}. Choice`}
                   </option>
-                  {COMMITTEES.map((c) => (
+                  {committeeOptions.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -778,9 +835,9 @@ const ApplicationForm = ({
                  required={hasQuestion('englishLevel')}
               >
                 <option value="">{FORM.placeholders.selectEnglishLevel}</option>
-                {FORM.options.englishLevel.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                {englishOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
                   </option>
                 ))}
               </select>
@@ -814,9 +871,9 @@ const ApplicationForm = ({
           className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
         >
           <option value="">{FORM.messages.selectNone}</option>
-          {FORM.options.dietaryPreferences.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          {dietaryOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
             </option>
           ))}
         </select>
@@ -879,7 +936,6 @@ const ApplicationForm = ({
                 </button>
               </div>
             )}
-            {applicationType === 'delegation' && customQuestionFields}
           </div>
 
           {applicationType !== 'delegation' && (
@@ -900,7 +956,7 @@ const ApplicationForm = ({
                   className="bg-gray-800 rounded-xl p-8 shadow-xl border-l-4 border-[var(--color-accent)]"
                 >
                   <h3 className="text-xl font-bold text-white mb-6">
-                    {formatQuestionText(questions.delegate, { number: i + 1 })}
+                    {questions.delegate ? `${questions.delegate} #${i + 1}` : `Delegate #${i + 1}`}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <input
@@ -985,9 +1041,9 @@ const ApplicationForm = ({
                       required={hasQuestion('delegateGender')}
                     >
                       <option value="">{FORM.placeholders.selectGenderRequired}</option>
-                      {FORM.options.gender.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      {genderOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
                         </option>
                       ))}
                     </select>
@@ -1004,16 +1060,13 @@ const ApplicationForm = ({
                       required={hasQuestion('delegateGrade')}
                     >
                       <option value="">{FORM.placeholders.selectGradeRequired}</option>
-                      {FORM.options.grade.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      {gradeOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
                         </option>
                       ))}
                     </select>
-                    <div className={`md:col-span-2 space-y-2 ${!hasQuestion('delegateCommitteePreferences') ? 'hidden' : ''}`}>
-                      <label className="text-white text-sm">
-                        {questions.delegateCommitteePreferences}
-                      </label>
+                    <div className={`md:col-span-2 space-y-2 ${!hasCommitteeChoices ? 'hidden' : ''}`}>
                       {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
                         <select
                           key={idx}
@@ -1028,12 +1081,12 @@ const ApplicationForm = ({
                             )
                           }
                           className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                          required={idx === 0 && hasQuestion('delegateCommitteePreferences')}
+                          required={Boolean(getChoiceQuestion(idx)?.required)}
                         >
                           <option value="">
-                            {formatQuestionText(questions.choice, { number: idx + 1 })}
+                            {getChoiceQuestion(idx)?.label || `${idx + 1}. Choice`}
                           </option>
-                          {COMMITTEES.map((c) => (
+                          {committeeOptions.map((c) => (
                             <option key={c} value={c}>
                               {c}
                             </option>
@@ -1054,9 +1107,9 @@ const ApplicationForm = ({
                       required={hasQuestion('delegateEnglishLevel')}
                     >
                       <option value="">{questions.delegateEnglishLevel}</option>
-                      {FORM.options.englishLevel.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      {englishOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
                         </option>
                       ))}
                     </select>
@@ -1072,9 +1125,9 @@ const ApplicationForm = ({
                       className={`${!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''} w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all`}
                     >
                       <option value="">{questions.delegateDietaryPreferences}</option>
-                      {FORM.options.dietaryPreferences.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      {dietaryOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
                         </option>
                       ))}
                     </select>
@@ -1099,7 +1152,7 @@ const ApplicationForm = ({
                         {formatQuestionText(questions.delegateMotivationLetter)}
                       </label>
                       <textarea
-                        placeholder={questions.delegateMotivationLetterPlaceholder}
+                        placeholder={getQuestion('delegateMotivationLetter')?.placeholder || undefined}
                         value={d.motivationLetter}
                         onChange={(e) =>
                           handleDelegateMemberChange(
@@ -1110,17 +1163,18 @@ const ApplicationForm = ({
                         }
                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
                         rows={4}
+                       minLength={getQuestion('delegateMotivationLetter')?.minCharacters || undefined}
                        required={hasQuestion('delegateMotivationLetter')}
                       />
-                      <p
+                      {minimumWordsFor('delegateMotivationLetter') > 0 && <p
                         className={`text-sm mt-1 text-left ${
-                          getWordCount(d.motivationLetter) >= rules.minimumMotivationWords
+                          getWordCount(d.motivationLetter) >= minimumWordsFor('delegateMotivationLetter')
                             ? 'text-green-500'
                             : 'text-red-500'
                         }`}
                       >
-                        {getWordCount(d.motivationLetter)} / {rules.minimumMotivationWords} words
-                      </p>
+                        {minimumWordsFor('delegateMotivationLetter') > 0 && `${getWordCount(d.motivationLetter)} / ${minimumWordsFor('delegateMotivationLetter')} words`}
+                      </p>}
                     </div>
                     <textarea
                       placeholder={questions.delegateAdditionalInfo}

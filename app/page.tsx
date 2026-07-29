@@ -1,9 +1,20 @@
 // app/page.tsx
 
 import Link from "next/link";
+import type { Metadata } from "next";
 import Countdown from "@/components/Countdown";
 import { COPY } from "@/lib/conference";
 import { getSiteSettings } from "@/lib/siteSettings";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { conference } = await getSiteSettings();
+
+  return {
+    title: { absolute: conference.displayName },
+    description: `${conference.sessionName}. Join us on ${conference.dates}. ${conference.hashtag}`,
+    alternates: { canonical: "/" },
+  };
+}
 
 export default async function Home() {
   const settings = await getSiteSettings();

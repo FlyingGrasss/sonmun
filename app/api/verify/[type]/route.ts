@@ -115,82 +115,112 @@ export async function POST(
       );
     }
 
-    const questionMap = settings.questions[type] ?? {};
-    const hasQuestion = (key: string) => Object.prototype.hasOwnProperty.call(questionMap, key);
-    const add = (row: (string | number | undefined)[], key: string, value: string | number | undefined) => {
-      if (hasQuestion(key)) row.push(value);
+    const questionDefinitions = settings.questions[type] ?? [];
+    const questionIds = new Set(questionDefinitions.map((question) => question.id));
+    const addOrderedValues = (
+      row: (string | number | undefined)[],
+      values: Record<string, string | number | undefined>,
+      skip = new Set<string>()
+    ) => {
+      for (const question of questionDefinitions) {
+        if (skip.has(question.id)) continue;
+        if (question.id === 'choice') {
+          for (let index = 0; index < settings.form.committeePreferenceCount; index += 1) row.push(values[`choice${index + 1}`] ?? '');
+        } else {
+          row.push(values[question.id] ?? '');
+        }
+      }
     };
-    const addChoices = (row: (string | number | undefined)[], choices?: string[]) => {
-      if (!hasQuestion('choice')) return;
-      for (let index = 0; index < settings.form.committeePreferenceCount; index += 1) row.push(choices?.[index] || '');
+    const mainValues: Record<string, string | number | undefined> = {
+      ...Object.fromEntries(Object.entries(formData).filter(([key]) => key !== 'customAnswers')),
+      email,
+      ...(formData.customAnswers ?? {}),
     };
+    const mainQuestionValues: Record<string, string | number | undefined> = {
+      ...mainValues,
+      schoolName: formData.school,
+      contactEmail: email,
+      choice1: formData.committeePreferences?.[0],
+      choice2: formData.committeePreferences?.[1],
+      choice3: formData.committeePreferences?.[2],
+    };
+    const wordCount = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
+    const validateQuestionLimit = (question: typeof questionDefinitions[number], value: string | number | undefined) => {
+      const text = String(value ?? '').trim();
+      if (!text) return null;
+      const minimumWords = question.minWords > 0
+        ? question.minWords
+        : question.id === 'motivationLetter' || question.id === 'delegateMotivationLetter'
+          ? settings.form.minimumMotivationWords
+          : 0;
+      if (question.minCharacters > 0 && text.length < question.minCharacters) {
+        return `${question.label} must be at least ${question.minCharacters} characters.`;
+      }
+      if (minimumWords > 0 && wordCount(text) < minimumWords) {
+        return `${question.label} must be at least ${minimumWords} words.`;
+      }
+      return null;
+    };
+    for (const question of questionDefinitions) {
+      const error = validateQuestionLimit(question, mainQuestionValues[question.id]);
+      if (error) return NextResponse.json({ error }, { status: 400 });
+    }
+    const delegateValues = (delegate: DelegateMember): Record<string, string | number | undefined> => ({
+      delegateFullName: delegate.fullName,
+      delegateBirthDate: delegate.birthDate,
+      delegateNationalId: delegate.nationalId,
+      delegateGender: delegate.gender,
+      choice1: delegate.committeePreferences?.[0],
+      choice2: delegate.committeePreferences?.[1],
+      choice3: delegate.committeePreferences?.[2],
+      delegateEnglishLevel: delegate.englishLevel,
+      delegateDietaryPreferences: delegate.dietaryPreferences,
+      delegateEmail: delegate.email,
+      delegatePhoneNumber: delegate.phoneNumber,
+      delegateGrade: delegate.grade,
+      delegateExperience: delegate.experience,
+      delegateMotivationLetter: delegate.motivationLetter,
+      delegateAdditionalInfo: delegate.additionalInfo,
+    });
     let values: (string | number | undefined)[][] = [];
 
     if (type === 'delegation') {
       const summary: (string | number | undefined)[] = [];
-      add(summary, 'schoolName', formData.school);
-      add(summary, 'numberOfDelegates', formData.numberOfDelegates);
-      add(summary, 'contactEmail', email);
+      addOrderedValues(summary, {
+        schoolName: formData.school,
+        numberOfDelegates: formData.numberOfDelegates,
+        contactEmail: email,
+        ...(formData.customAnswers ?? {}),
+      }, new Set(questionDefinitions.filter((question) => question.id.startsWith('delegate') || question.id.startsWith('choice') || question.id === 'choice').map((question) => question.id)));
       values.push(summary);
       if (Array.isArray(formData.delegates)) {
+        for (const delegate of formData.delegates) {
+          for (const question of questionDefinitions) {
+            const error = validateQuestionLimit(question, delegateValues(delegate)[question.id]);
+            if (error) return NextResponse.json({ error }, { status: 400 });
+          }
+        }
         formData.delegates.forEach((delegate) => {
           const row: (string | number | undefined)[] = [];
-          add(row, 'delegateFullName', delegate.fullName);
-          add(row, 'delegateBirthDate', delegate.birthDate);
-          add(row, 'delegateNationalId', delegate.nationalId);
-          add(row, 'delegateGender', delegate.gender);
-          addChoices(row, delegate.committeePreferences);
-          add(row, 'delegateEnglishLevel', delegate.englishLevel);
-          add(row, 'delegateDietaryPreferences', delegate.dietaryPreferences);
-          add(row, 'delegateEmail', delegate.email);
-          add(row, 'delegatePhoneNumber', delegate.phoneNumber);
-          add(row, 'delegateCity', delegate.city);
-          add(row, 'delegateGrade', delegate.grade);
-          add(row, 'delegateExperience', delegate.experience);
-          add(row, 'delegateMotivationLetter', delegate.motivationLetter);
-          add(row, 'delegateAdditionalInfo', delegate.additionalInfo);
+          addOrderedValues(row, delegateValues(delegate), new Set(['schoolName', 'numberOfDelegates', 'contactEmail']));
           values.push(row);
         });
       }
     } else {
       const row: (string | number | undefined)[] = [];
-      add(row, 'fullName', formData.fullName);
-      add(row, 'email', email);
-      add(row, 'phoneNumber', formData.phoneNumber);
-      add(row, 'nationalId', formData.nationalId);
-      add(row, 'birthDate', formData.birthDate);
-      add(row, 'gender', formData.gender);
-      add(row, 'school', formData.school);
-      add(row, 'city', formData.city);
-      add(row, 'grade', formData.grade);
-      if (type === 'delegate') {
-        add(row, 'englishLevel', formData.englishLevel);
-        addChoices(row, formData.committeePreferences);
-        add(row, 'experience', formData.experience);
-        add(row, 'motivationLetter', formData.motivationLetter);
-      } else if (type === 'press') {
-        add(row, 'experience', formData.experience);
-        add(row, 'motivationLetter', formData.motivationLetter);
-        add(row, 'camera', formData.camera);
-      } else if (type === 'chair') {
-        add(row, 'englishLevel', formData.englishLevel || 'N/A');
-        addChoices(row, formData.committeePreferences);
-        add(row, 'experience', formData.experience);
-        add(row, 'references', formData.references);
-        add(row, 'motivationLetter', formData.motivationLetter);
-        add(row, 'chairAnswer1', formData.chairAnswer1 || '');
-        add(row, 'chairAnswer3', formData.chairAnswer3 || '');
-        add(row, 'chairAnswer2', formData.chairAnswer2 || '');
-      } else {
-        add(row, 'experience', formData.experience);
-        add(row, 'motivationLetter', formData.motivationLetter);
+      if (questionIds.has('choice1')) {
+        mainValues.choice1 = formData.committeePreferences?.[0];
+        mainValues.choice2 = formData.committeePreferences?.[1];
+        mainValues.choice3 = formData.committeePreferences?.[2];
       }
-      add(row, 'dietaryPreferences', formData.dietaryPreferences);
-      add(row, 'additionalInfo', formData.additionalInfo);
+      if (questionIds.has('choice') && !questionIds.has('choice1')) {
+        mainValues.choice1 = formData.committeePreferences?.[0];
+        mainValues.choice2 = formData.committeePreferences?.[1];
+        mainValues.choice3 = formData.committeePreferences?.[2];
+      }
+      addOrderedValues(row, mainValues);
       values = [row];
     }
-
-    if (values[0] && formData.customAnswers) values[0].push(...Object.values(formData.customAnswers));
 
     const sheets = google.sheets({ version: 'v4', auth });
     await sheets.spreadsheets.values.append({

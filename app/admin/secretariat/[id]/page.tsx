@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteSecretariatAction, updateSecretariatAction } from "@/app/admin/actions";
 import ImageUrlField from "@/components/admin/ImageUrlField";
+import NameAndSlugFields from "@/components/admin/NameAndSlugFields";
 import { requireAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/prisma";
 
@@ -32,8 +33,7 @@ export default async function EditSecretariatPage({
       <form action={updateAction} className="mx-auto flex max-w-3xl flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
         <Link href="/admin" className="text-sm text-[var(--color-accent)]">Back to dashboard</Link>
         <h1 className="text-3xl font-bold">Edit Secretariat Member</h1>
-        <input name="name" defaultValue={member.name} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
-        <label className="flex flex-col gap-2 text-sm">Link<input name="slug" defaultValue={member.slug} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" /></label>
+        <NameAndSlugFields basePath="/secretariat" nameValue={member.name} slugValue={member.slug} />
         <input name="role" defaultValue={member.role} required className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <input name="sortOrder" type="number" defaultValue={member.sortOrder} className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <ImageUrlField name="imageUrl" id="secretariat-image-url" defaultValue={member.imageUrl} required />

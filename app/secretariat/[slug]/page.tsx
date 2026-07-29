@@ -3,8 +3,8 @@
 import ContentImage from "@/components/ContentImage";
 import RichText from "@/components/RichText";
 import { getPublishedSecretariat, getPublishedSecretariatMember } from "@/lib/content";
-import { CONFERENCE, COPY, formatConferenceText } from "@/lib/conference";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { COPY, formatConferenceText } from "@/lib/conference";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 
@@ -18,19 +18,24 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const member = await getPublishedSecretariatMember(slug);
+  const { conference } = await getSiteSettings();
   
   if (!member) return {};
+
+  const siteUrl = normalizeSiteUrl(conference.siteUrl);
   
   return {
     title: `${member.name} - Secretariat`,
     description: formatConferenceText(COPY.metadata.secretariatDetailDescription, {
       memberName: member.name,
       role: member.role,
-      shortName: CONFERENCE.shortName,
+      shortName: conference.shortName,
     }),
+    alternates: { canonical: `/secretariat/${member.slug}` },
     openGraph: {
       title: member.name,
-      images: [member.imageUrl],
+      url: `${siteUrl}/secretariat/${member.slug}`,
+      images: [{ url: member.imageUrl, alt: `${member.name}, ${member.role}` }],
     },
   };
 }

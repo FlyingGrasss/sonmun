@@ -3,15 +3,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ClipboardCheck, Globe2, Landmark, Newspaper, Star, type LucideIcon } from 'lucide-react';
-import { CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { COPY, formatConferenceText } from '@/lib/conference';
+import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
 
-export const metadata: Metadata = {
-  title: 'Apply',
-  description: formatConferenceText(COPY.metadata.applyDescription, {
-    shortName: CONFERENCE.shortName,
-  }),
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { conference } = await getSiteSettings();
+  return {
+    title: 'Apply',
+    description: formatConferenceText(COPY.metadata.applyDescription, { shortName: conference.shortName }),
+    alternates: { canonical: '/apply' },
+    openGraph: { url: `${normalizeSiteUrl(conference.siteUrl)}/apply` },
+  };
+}
 
 const APPLICATION_ORDER = ['delegation', 'delegate', 'admin', 'chair', 'press'];
 

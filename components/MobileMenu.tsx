@@ -43,7 +43,7 @@ export default function MobileMenu({ showCommittees, showSecretariat }: { showCo
             <Link
               key={link.href}
               href={link.href}
-              className={`text-2xl py-4 flex gap-1.5 items-center border-b border-gray-600 ${isActive(link.href) ? "text-[var(--color-accent)]" : "text-white"}`}
+              className={`text-2xl py-4 flex gap-1.5 items-center border-b border-[var(--foreground)] ${isActive(link.href) ? "text-[var(--color-accent)]" : "text-white"}`}
               onClick={() => setIsOpen(false)}
             >
               <NavigationIcon name={link.icon} className={isActive(link.href) ? "stroke-[var(--color-accent)]" : "stroke-white"} />
@@ -52,7 +52,7 @@ export default function MobileMenu({ showCommittees, showSecretariat }: { showCo
           ))}
           <Link
             href="/apply"
-            className="text-2xl flex gap-1.5 items-center py-4 text-[var(--color-accent)] border-b border-gray-600 hover:text-white transition-colors duration-300"
+            className="text-2xl flex gap-1.5 items-center py-4 text-[var(--color-accent)] border-b border-[var(--foreground)] hover:text-white transition-colors duration-300"
             onClick={() => setIsOpen(false)}
           >
             <NavigationIcon name="apply" className="stroke-[var(--color-accent)]" />

@@ -6,8 +6,10 @@ import { Tinos } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackgroundAnimations from "@/components/BackgroundAnimations";
-import { ASSETS, CONFERENCE, THEME } from "@/lib/conference";
-import { getSiteSettings } from "@/lib/siteSettings";
+import StructuredData from "@/components/StructuredData";
+import SmoothScroll from "@/components/SmoothScroll";
+import { ASSETS, THEME } from "@/lib/conference";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 
 const tinos = Tinos({
   subsets: ["latin"],
@@ -16,64 +18,44 @@ const tinos = Tinos({
   variable: "--font-tinos",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: CONFERENCE.displayName,
-    template: `%s | ${CONFERENCE.displayName}`,
-  },
-  description: `${CONFERENCE.sessionName}. Join us on ${CONFERENCE.dates}. ${CONFERENCE.hashtag}`,
-  keywords: [
-    ...CONFERENCE.keywords,
-    CONFERENCE.shortName,
-    CONFERENCE.brandName,
-  ],
-  icons: {
-    icon: [{ url: ASSETS.favicon, type: "image/x-icon" }],
-    apple: [
-      {
-        url: ASSETS.logo,
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ],
-  },
-  openGraph: {
-    title: `${CONFERENCE.displayName} | ${CONFERENCE.fullName}`,
-    description: `${CONFERENCE.dates} | ${CONFERENCE.sessionName}.`,
-    url: CONFERENCE.siteUrl,
-    siteName: CONFERENCE.displayName,
-    images: [
-      {
-        url: `${CONFERENCE.siteUrl}${ASSETS.openGraph}`,
-        width: 1200,
-        height: 630,
-        alt: `${CONFERENCE.displayName} - ${CONFERENCE.fullName}`,
-      },
-    ],
-    locale: CONFERENCE.locale,
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${CONFERENCE.displayName} | ${CONFERENCE.fullName}`,
-    description: `${CONFERENCE.dates} | ${CONFERENCE.hashtag}`,
-    images: [`${CONFERENCE.siteUrl}${ASSETS.openGraph}`],
-  },
-  metadataBase: new URL(CONFERENCE.siteUrl),
-  alternates: {
-    canonical: "/",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const conference = settings.conference;
+  const siteUrl = normalizeSiteUrl(conference.siteUrl);
+
+  return {
+    title: {
+      default: conference.displayName,
+      template: `%s | ${conference.displayName}`,
     },
-  },
-};
+    description: `${conference.sessionName}. Join us on ${conference.dates}. ${conference.hashtag}`,
+    keywords: [...conference.keywords, conference.shortName, conference.brandName],
+    icons: {
+      icon: [{ url: ASSETS.favicon, type: "image/x-icon" }],
+      apple: [{ url: ASSETS.logo, sizes: "180x180", type: "image/png" }],
+    },
+    openGraph: {
+      title: `${conference.displayName} | ${conference.fullName}`,
+      description: `${conference.dates} | ${conference.sessionName}.`,
+      url: siteUrl,
+      siteName: conference.displayName,
+      images: [{ url: `${siteUrl}${ASSETS.openGraph}`, width: 1200, height: 630, alt: `${conference.displayName} - ${conference.fullName}` }],
+      locale: conference.locale,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${conference.displayName} | ${conference.fullName}`,
+      description: `${conference.dates} | ${conference.hashtag}`,
+      images: [`${siteUrl}${ASSETS.openGraph}`],
+    },
+    metadataBase: new URL(siteUrl),
+    verification: process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : undefined,
+    robots: { index: true, follow: true, nocache: false, googleBot: { index: true, follow: true, noimageindex: false } },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -83,7 +65,7 @@ export default async function RootLayout({
   const settings = await getSiteSettings();
 
   return (
-    <html lang="en" className="overflow-x-hidden max-w-screen scroll-smooth">
+    <html lang="en" data-scroll-behavior="smooth" className="overflow-x-hidden max-w-screen scroll-smooth">
       <body
         className={`overflow-x-hidden max-w-screen ${tinos.variable} ${tinos.className} antialiased`}
         style={{
@@ -98,29 +80,32 @@ export default async function RootLayout({
           "--color-warm": THEME.warm,
         } as CSSProperties}
       >
-        <div
-          aria-hidden="true"
-          className="fixed top-0 left-0 z-[-1] h-[1200px] w-full pointer-events-none"
-          style={{
-            background: `linear-gradient(180deg, ${THEME.background} 0%, ${THEME.middle} 48%, ${THEME.warm} 100%)`,
-          }}
-        />
-        <BackgroundAnimations />
-
-        <div className="min-h-screen relative z-10">
-          <Navbar
-            brandName={settings.conference.brandName}
-            showCommittees={settings.pages.committeesEnabled}
-            showSecretariat={settings.pages.secretariatEnabled}
+        <SmoothScroll>
+          <div
+            aria-hidden="true"
+            className="fixed top-0 left-0 z-[-1] h-[1200px] w-full pointer-events-none"
+            style={{
+              background: `linear-gradient(180deg, ${THEME.background} 0%, ${THEME.middle} 48%, ${THEME.warm} 100%)`,
+            }}
           />
-          {children}
-        </div>
-        <Footer
-          year={settings.conference.year}
-          brandName={settings.conference.brandName}
-          organizer={settings.conference.organizer}
-        />
-        <Analytics />
+          <BackgroundAnimations />
+          <StructuredData conference={settings.conference} />
+
+          <div className="min-h-screen relative z-10">
+            <Navbar
+              brandName={settings.conference.brandName}
+              showCommittees={settings.pages.committeesEnabled}
+              showSecretariat={settings.pages.secretariatEnabled}
+            />
+            {children}
+          </div>
+          <Footer
+            year={settings.conference.year}
+            brandName={settings.conference.brandName}
+            organizer={settings.conference.organizer}
+          />
+          <Analytics />
+        </SmoothScroll>
       </body>
     </html>
   );

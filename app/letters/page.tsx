@@ -1,36 +1,20 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { ASSETS, CONFERENCE, COPY, formatConferenceText } from '@/lib/conference';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { ASSETS, COPY, formatConferenceText } from '@/lib/conference';
+import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
 
-export const metadata: Metadata = {
-  title: "Letters",
-  description: formatConferenceText(COPY.metadata.lettersDescription, {
-    shortName: CONFERENCE.shortName,
-  }),
-  keywords: [
-    CONFERENCE.shortName,
-    "Letters",
-    "Secretary General",
-    "MUN conference",
-    "Model United Nations",
-    ...CONFERENCE.keywords,
-  ],
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const { conference } = await getSiteSettings();
+  const description = formatConferenceText(COPY.metadata.lettersDescription, { shortName: conference.shortName });
+  return {
     title: "Letters",
-    description: formatConferenceText(COPY.metadata.lettersDescription, {
-      shortName: CONFERENCE.shortName,
-    }),
-    url: `${CONFERENCE.siteUrl}/letters`,
-  },
-  twitter: {
-    title: "Letters",
-    description: formatConferenceText(COPY.metadata.lettersDescription, {
-      shortName: CONFERENCE.shortName,
-    }),
-    card: "summary_large_image",
-  },
-};
+    description,
+    alternates: { canonical: "/letters" },
+    keywords: [conference.shortName, "Letters", "Secretary General", "MUN conference", "Model United Nations", ...conference.keywords],
+    openGraph: { title: "Letters", description, url: `${normalizeSiteUrl(conference.siteUrl)}/letters` },
+    twitter: { title: "Letters", description, card: "summary_large_image" },
+  };
+}
 
 const Letters = async () => {
   const settings = await getSiteSettings();
