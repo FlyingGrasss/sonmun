@@ -10,7 +10,7 @@ Conference-specific content is stored in [`config/conference.json`](C:/Desktop/s
 - the full color palette and asset paths
 - enabled application types, card descriptions, and application images
 - application labels, option lists, validation messages, committee choices, and separate `form.questions` sections for delegate, chair, delegation, press, and admin applications
-- navigation, letters, footer, and page metadata copy
+- navigation, ordered `copy.letters.entries` content, footer, and page metadata copy
 
 Committee and Secretariat content is database-backed and managed from `/admin`; it is intentionally not duplicated in JSON.
 
@@ -24,7 +24,7 @@ After logging in at `/admin`, administrators can:
 - enable or disable each application type; disabled types disappear from `/apply` and reject direct form/API requests
 - edit the existing labels and prompts for every delegate, chair, delegation, press, and admin question
 - set optional minimum word and character limits for questions; use `0` to leave a limit disabled
-- edit the Letters page title, opening, and paragraphs
+- add, edit, delete, and reorder multiple letters, each with its own title and content box
 
 Conference settings are stored in the `ConferenceSettings` database table. If the table is unavailable, the site falls back to `config/conference.json`. Application questions are ordered arrays of explicit question objects with an `id`, label, type, required flag, placeholder, and dropdown options. In the admin panel, edit the visible question text directly, choose the answer type, enter dropdown options one per line, use the arrows to set order, and delete or add rows as needed. The generated Google Sheets header below each application group follows that same order. The required Muhteşem Yüzyıl rating appears after selecting `FKK: Muhteşem Yüzyıl` in delegate and chair applications.
 

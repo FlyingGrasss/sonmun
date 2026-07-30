@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { THEME } from '@/lib/conference';
@@ -73,16 +73,16 @@ export async function POST(
       );
     }
 
-    const authGoogle = new google.auth.GoogleAuth({
+    const authGoogle = new auth.GoogleAuth({
       credentials: SERVICE_ACCOUNT_KEY,
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
-    const sheets = google.sheets({
+    const sheetsClient = sheets({
       version: 'v4',
       auth: authGoogle,
     });
 
-    const sheetResponse = await sheets.spreadsheets.values.get({
+    const sheetResponse = await sheetsClient.spreadsheets.values.get({
       spreadsheetId: sheetId,
       range: 'Sayfa1!A:Z',
     });

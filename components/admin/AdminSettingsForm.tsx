@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Copy, Plus, Save, Trash2, X } from "lucide-react";
 import { getApplicationSheetHeaders } from "@/lib/applicationSheetHeaders";
 import { isInternalQuestionKey, QUESTION_TYPES, type QuestionDefinition, type QuestionType } from "@/lib/questions";
-import type { EditableSettings } from "@/lib/siteSettings";
+import type { EditableLetter, EditableSettings } from "@/lib/siteSettings";
 
 type SaveAction = (formData: FormData) => Promise<{ ok: boolean; message?: string }>;
 type QuestionRow = QuestionDefinition;
 type QuestionGroup = { type: string; rows: QuestionRow[] };
+type LetterRow = EditableLetter;
 
 const inputClass = "rounded-lg border border-white/15 bg-white/10 px-3 py-2 outline-none focus:border-[var(--color-accent)]";
 
@@ -113,6 +114,7 @@ export default function AdminSettingsForm({ settings, action }: { settings: Edit
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>(() => initialQuestionGroups(settings));
+  const [letterEntries, setLetterEntries] = useState<LetterRow[]>(() => settings.letters.entries.map((letter) => ({ ...letter, paragraphs: [...letter.paragraphs] })));
 
   const sheetHeaders = useMemo(() => {
     const questions = Object.fromEntries(questionGroups.map((group) => [
@@ -174,6 +176,41 @@ export default function AdminSettingsForm({ settings, action }: { settings: Edit
     setIsDirty(true);
   };
 
+  const updateLetter = (index: number, changes: Partial<LetterRow>) => {
+    setLetterEntries((entries) => entries.map((entry, entryIndex) => entryIndex === index ? { ...entry, ...changes } : entry));
+    setIsDirty(true);
+  };
+
+  const addLetter = () => {
+    const existingIds = new Set(letterEntries.map((letter) => letter.id));
+    let suffix = letterEntries.length + 1;
+    while (existingIds.has(`letter-${suffix}`)) suffix += 1;
+    setLetterEntries((entries) => [...entries, {
+      id: `letter-${suffix}`,
+      titlePrefix: "Letter From The",
+      titleHighlight: "New Letter",
+      opening: "Dear Participants",
+      paragraphs: [],
+    }]);
+    setIsDirty(true);
+  };
+
+  const deleteLetter = (index: number) => {
+    setLetterEntries((entries) => entries.filter((_, entryIndex) => entryIndex !== index));
+    setIsDirty(true);
+  };
+
+  const moveLetter = (index: number, direction: -1 | 1) => {
+    setLetterEntries((entries) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= entries.length) return entries;
+      const nextEntries = [...entries];
+      [nextEntries[index], nextEntries[nextIndex]] = [nextEntries[nextIndex], nextEntries[index]];
+      return nextEntries;
+    });
+    setIsDirty(true);
+  };
+
   const leavePage = () => { if (!pendingHref) return; setIsDirty(false); setIsLeaveModalOpen(false); window.location.assign(pendingHref); };
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -208,7 +245,7 @@ export default function AdminSettingsForm({ settings, action }: { settings: Edit
 
       <CollapsibleSection id="application-settings" title="Applications"><p className="mb-5 text-sm text-white/65">Disable an application to remove it from the site and reject direct access to its form.</p><div className="grid gap-5">{settings.applications.map((application) => <details key={application.id} className="rounded-lg border border-white/10 bg-white/5 p-4"><summary className="flex cursor-pointer list-none items-center justify-between px-2 text-lg font-semibold capitalize [&::-webkit-details-marker]:hidden">{application.title || application.id}<ChevronDown className="h-4 w-4 text-[var(--color-accent)]" aria-hidden="true" /></summary><div className="mt-4 grid gap-4"><label className="flex items-center gap-2 text-sm text-white"><input name={`application_${application.id}_enabled`} type="checkbox" defaultChecked={application.enabled} /> Enabled</label><div className="grid gap-4 sm:grid-cols-2"><Field label="Card title" name={`application_${application.id}_title`} value={application.title} required /><Field label="Form title" name={`application_${application.id}_formTitle`} value={application.formTitle} required /></div><TextField label="Description" name={`application_${application.id}_description`} value={application.description} rows={3} /></div></details>)}</div></CollapsibleSection>
 
-      <CollapsibleSection id="letters-settings" title="Letters Page"><div className="grid gap-4"><TextField label="Title prefix" name="lettersTitlePrefix" value={settings.letters.titlePrefix} rows={2} /><TextField label="Highlighted title" name="lettersTitleHighlight" value={settings.letters.titleHighlight} rows={2} /><TextField label="Letter content" name="lettersContent" value={[settings.letters.opening, ...settings.letters.paragraphs].join("\n\n")} rows={16} /></div></CollapsibleSection>
+      <CollapsibleSection id="letters-settings" title="Letters Page"><p className="mb-5 text-sm text-white/65">Each letter appears in its own titled box. Add, delete, or reorder letters with the controls, then edit each letter&apos;s title and content below.</p><input type="hidden" name="lettersCount" value={letterEntries.length} /><div className="grid gap-5">{letterEntries.map((letter, index) => <div key={`${letter.id}-${index}`} className="rounded-lg border border-white/10 bg-white/5 p-4"><div className="mb-4 flex items-center justify-between gap-3"><h3 className="text-lg font-semibold">Letter {index + 1}</h3><div className="flex items-center gap-2"><button type="button" onClick={() => moveLetter(index, -1)} disabled={index === 0} title="Move letter up" aria-label="Move letter up" className="rounded-lg border border-white/20 p-2 text-white/75 hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-30"><ArrowUp className="h-4 w-4" aria-hidden="true" /></button><button type="button" onClick={() => moveLetter(index, 1)} disabled={index === letterEntries.length - 1} title="Move letter down" aria-label="Move letter down" className="rounded-lg border border-white/20 p-2 text-white/75 hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-30"><ArrowDown className="h-4 w-4" aria-hidden="true" /></button><button type="button" onClick={() => deleteLetter(index)} title="Delete letter" aria-label="Delete letter" className="rounded-lg border border-red-300/30 p-2 text-red-100 hover:border-red-300 hover:bg-red-400/10"><Trash2 className="h-4 w-4" aria-hidden="true" /></button></div></div><input type="hidden" name={`letter_${index}_id`} value={letter.id} /><div className="grid gap-4 sm:grid-cols-2"><label className="flex flex-col gap-2 text-sm text-white">Title before accent<input name={`letter_${index}_titlePrefix`} value={letter.titlePrefix} onChange={(event) => updateLetter(index, { titlePrefix: event.target.value })} className={inputClass} required /></label><label className="flex flex-col gap-2 text-sm text-white">Highlighted title<input name={`letter_${index}_titleHighlight`} value={letter.titleHighlight} onChange={(event) => updateLetter(index, { titleHighlight: event.target.value })} className={inputClass} required /></label></div><label className="mt-4 flex flex-col gap-2 text-sm text-white">Opening<textarea name={`letter_${index}_opening`} value={letter.opening} onChange={(event) => updateLetter(index, { opening: event.target.value })} rows={2} className={inputClass} required /></label><label className="mt-4 flex flex-col gap-2 text-sm text-white">Letter paragraphs <span className="text-xs text-white/55">Separate paragraphs with a blank line. You can use {`{sessionName}`}, {`{dates}`}, and {`{shortName}`} for conference details.</span><textarea name={`letter_${index}_paragraphs`} value={letter.paragraphs.join("\n\n")} onChange={(event) => updateLetter(index, { paragraphs: event.target.value.split(/\r?\n\s*\r?\n/).map((paragraph) => paragraph.trim()).filter(Boolean) })} rows={10} className={inputClass} /></label></div>)}<button type="button" onClick={addLetter} className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm font-semibold hover:border-[var(--color-accent)]"><Plus className="h-4 w-4" aria-hidden="true" />Add letter</button></div></CollapsibleSection>
 
       <CollapsibleSection id="question-settings" title="Application Questions"><p className="mb-5 text-sm text-white/65">Each row is one real question. Use the arrows to set its order, choose the answer type, mark it as required, and enter dropdown options one per line. The order below is also the order used in Google Sheets.</p><div className="grid gap-5">{questionGroups.map((group) => <details key={group.type} className="rounded-lg border border-white/10 bg-white/5 p-4"><summary className="flex cursor-pointer list-none items-center justify-between px-2 text-lg font-semibold capitalize [&::-webkit-details-marker]:hidden">{group.type}<ChevronDown className="h-4 w-4 text-[var(--color-accent)]" aria-hidden="true" /></summary><div className="mt-4 grid gap-4"><input type="hidden" name={`question_${group.type}_count`} value={group.rows.length} />{group.rows.map((row, index) => <QuestionEditor key={`${row.id}-${index}`} type={group.type} index={index} total={group.rows.length} row={row} onChange={(changes) => updateQuestion(group.type, index, changes)} onDelete={() => deleteQuestion(group.type, index)} onMove={(direction) => moveQuestion(group.type, index, direction)} />)}<button type="button" onClick={() => addQuestion(group.type)} className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm font-semibold hover:border-[var(--color-accent)]"><Plus className="h-4 w-4" aria-hidden="true" />Add question</button></div></details>)}</div>{sheetHeaders.map((row) => <SheetHeaderPreview key={row.applicationType} applicationType={row.applicationType} text={row.text} />)}</CollapsibleSection>
     </form>

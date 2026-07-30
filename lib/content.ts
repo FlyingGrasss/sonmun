@@ -1,27 +1,28 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
-export async function getPublishedCommittees() {
+export const getPublishedCommittees = cache(async () => {
   return prisma.committee.findMany({
     where: { isPublished: true },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   });
-}
+});
 
-export async function getPublishedCommittee(slug: string) {
+export const getPublishedCommittee = cache(async (slug: string) => {
   return prisma.committee.findFirst({
     where: { slug, isPublished: true },
   });
-}
+});
 
-export async function getPublishedSecretariat() {
+export const getPublishedSecretariat = cache(async () => {
   return prisma.secretariatMember.findMany({
     where: { isPublished: true },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   });
-}
+});
 
-export async function getPublishedSecretariatMember(slug: string) {
+export const getPublishedSecretariatMember = cache(async (slug: string) => {
   return prisma.secretariatMember.findFirst({
     where: { slug, isPublished: true },
   });
-}
+});

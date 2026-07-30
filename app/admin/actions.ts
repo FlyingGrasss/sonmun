@@ -204,14 +204,21 @@ export async function saveConferenceSettingsAction(formData: FormData) {
     settings.questions[type] = questions;
   }
 
-  settings.letters.titlePrefix = stringValue(formData, "lettersTitlePrefix");
-  settings.letters.titleHighlight = stringValue(formData, "lettersTitleHighlight");
-  const letterParts = stringValue(formData, "lettersContent")
-    .split(/\r?\n\s*\r?\n/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-  settings.letters.opening = letterParts.shift() ?? "";
-  settings.letters.paragraphs = letterParts;
+  const letterCount = Math.max(0, intValue(formData, "lettersCount"));
+  settings.letters.entries = Array.from({ length: letterCount }, (_, index) => {
+    const prefix = `letter_${index}`;
+    const paragraphs = stringValue(formData, `${prefix}_paragraphs`)
+      .split(/\r?\n\s*\r?\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+    return {
+      id: stringValue(formData, `${prefix}_id`).replace(/[^a-zA-Z0-9_-]/g, "") || `letter-${index + 1}`,
+      titlePrefix: stringValue(formData, `${prefix}_titlePrefix`),
+      titleHighlight: stringValue(formData, `${prefix}_titleHighlight`),
+      opening: stringValue(formData, `${prefix}_opening`),
+      paragraphs,
+    };
+  });
 
   await prisma.conferenceSettings.upsert({
     where: { id: 1 },
@@ -223,6 +230,7 @@ export async function saveConferenceSettingsAction(formData: FormData) {
   revalidatePath("/letters");
   revalidatePath("/apply");
   revalidatePath("/sitemap.xml");
+  revalidatePath("/robots.txt");
   revalidatePath("/committees");
   revalidatePath("/secretariat");
   for (const application of settings.applications) {

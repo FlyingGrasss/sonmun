@@ -1,4 +1,5 @@
 import conferenceConfig from "@/config/conference.json";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { normalizeQuestionGroups, type QuestionGroups } from "@/lib/questions";
 
@@ -9,6 +10,14 @@ export type EditableApplication = {
   formTitle: string;
   description: string;
   image?: string;
+};
+
+export type EditableLetter = {
+  id: string;
+  titlePrefix: string;
+  titleHighlight: string;
+  opening: string;
+  paragraphs: string[];
 };
 
 export type EditableSettings = {
@@ -47,10 +56,7 @@ export type EditableSettings = {
   };
   questions: QuestionGroups;
   letters: {
-    titlePrefix: string;
-    titleHighlight: string;
-    opening: string;
-    paragraphs: string[];
+    entries: EditableLetter[];
   };
 };
 
@@ -97,15 +103,33 @@ export const fallbackSettings: EditableSettings = {
   },
   questions: normalizeQuestionGroups(config.form.questions, config.form),
   letters: {
-    titlePrefix: config.copy.letters.titlePrefix,
-    titleHighlight: config.copy.letters.titleHighlight,
-    opening: config.copy.letters.opening,
-    paragraphs: [...config.copy.letters.paragraphs],
+    entries: config.copy.letters.entries.map((letter) => ({
+      id: letter.id,
+      titlePrefix: letter.titlePrefix,
+      titleHighlight: letter.titleHighlight,
+      opening: letter.opening,
+      paragraphs: [...letter.paragraphs],
+    })),
   },
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function normalizeLetter(value: unknown, index: number, fallback: EditableLetter): EditableLetter {
+  const source = isRecord(value) ? value : {};
+  const paragraphs = Array.isArray(source.paragraphs)
+    ? source.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph) => paragraph.trim()).filter(Boolean)
+    : fallback.paragraphs;
+
+  return {
+    id: typeof source.id === "string" && source.id.trim() ? source.id.trim() : `letter-${index + 1}`,
+    titlePrefix: typeof source.titlePrefix === "string" ? source.titlePrefix.trim() : fallback.titlePrefix,
+    titleHighlight: typeof source.titleHighlight === "string" ? source.titleHighlight.trim() : fallback.titleHighlight,
+    opening: typeof source.opening === "string" ? source.opening.trim() : fallback.opening,
+    paragraphs,
+  };
 }
 
 function mergeSettings(value: unknown): EditableSettings {
@@ -127,6 +151,11 @@ function mergeSettings(value: unknown): EditableSettings {
   const letters = isRecord(value.letters) ? value.letters : {};
   const form = isRecord(value.form) ? value.form : {};
   const pages = isRecord(value.pages) ? value.pages : {};
+  const legacyLetter = isRecord(letters) && !Array.isArray(letters.entries) ? [letters] : [];
+  const savedLetters = Array.isArray(letters.entries) ? letters.entries : legacyLetter;
+  const letterEntries = savedLetters
+    .map((letter, index) => normalizeLetter(letter, index, fallbackSettings.letters.entries[index] ?? fallbackSettings.letters.entries[0]))
+    .filter((letter) => letter.titlePrefix || letter.titleHighlight || letter.opening || letter.paragraphs.length > 0);
 
   return {
     conference: {
@@ -157,16 +186,12 @@ function mergeSettings(value: unknown): EditableSettings {
       config.form.questions
     ),
     letters: {
-      ...fallbackSettings.letters,
-      ...letters,
-      paragraphs: Array.isArray(letters.paragraphs)
-        ? letters.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string")
-        : fallbackSettings.letters.paragraphs,
+      entries: letterEntries.length > 0 ? letterEntries : fallbackSettings.letters.entries,
     },
   };
 }
 
-export async function getSiteSettings(): Promise<EditableSettings> {
+export const getSiteSettings = cache(async (): Promise<EditableSettings> => {
   try {
     const saved = await prisma.conferenceSettings.findUnique({ where: { id: 1 } });
     return saved ? mergeSettings(saved.data) : fallbackSettings;
@@ -174,4 +199,4 @@ export async function getSiteSettings(): Promise<EditableSettings> {
     console.error("[settings] Falling back to conference.json:", error);
     return fallbackSettings;
   }
-}
+});

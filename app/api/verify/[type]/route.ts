@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import getMessage from '@/lib/getMessage';
 import { getSiteSettings } from '@/lib/siteSettings';
 
@@ -51,7 +51,7 @@ type ApplicationPayload = {
   delegates?: DelegateMember[];
 };
 
-const auth = new google.auth.GoogleAuth({
+const googleAuth = new auth.GoogleAuth({
   credentials: JSON.parse(
     process.env.GOOGLE_SERVICE_ACCOUNT_KEY!
   ),
@@ -220,8 +220,8 @@ export async function POST(
       values = [row];
     }
 
-    const sheets = google.sheets({ version: 'v4', auth });
-    await sheets.spreadsheets.values.append({
+    const sheetsClient = sheets({ version: 'v4', auth: googleAuth });
+    await sheetsClient.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: 'Sayfa1!A:Z',
       valueInputOption: 'RAW',
