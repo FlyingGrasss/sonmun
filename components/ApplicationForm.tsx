@@ -93,6 +93,7 @@ interface DelegateMember {
   additionalInfo: string;
   englishLevel: string;
   dietaryPreferences: string;
+  references: string;
 }
 
 const ApplicationForm = ({
@@ -302,7 +303,8 @@ const ApplicationForm = ({
       committeePreferences: Array(rules.committeePreferenceCount).fill(''),
       additionalInfo: '',
       englishLevel: '',
-      dietaryPreferences: ''
+      dietaryPreferences: '',
+      references: ''
     });
 
     setDelegates(newDelegates);
@@ -514,7 +516,7 @@ const ApplicationForm = ({
     'delegateFullName', 'delegateEmail', 'delegatePhoneNumber', 'delegateNationalId', 'delegateBirthDate',
     'delegateGender', 'delegateGrade', 'delegateCity', 'delegateCommitteePreferences', 'delegateEnglishLevel',
     'delegateDietaryPreferences', 'delegateExperience', 'delegateMotivationLetter', 'delegateMotivationLetterPlaceholder',
-    'delegateAdditionalInfo', 'chairAnswer1', 'chairAnswer2', 'chairAnswer3', 'references', 'camera',
+    'delegateAdditionalInfo', 'delegateReferences', 'chairAnswer1', 'chairAnswer2', 'chairAnswer3', 'references', 'camera',
   ]);
   const hasQuestion = (key: string) => Boolean(getQuestion(key)?.label.trim());
   const shouldShowCustomQuestion = (question: QuestionDefinition) =>
@@ -746,20 +748,19 @@ const ApplicationForm = ({
         />
       </div>
 
-      {applicationType === 'chair' && (
-        <div className={!hasQuestion('references') ? 'hidden' : ''}>
-          <label className="block text-white text-sm font-medium mb-2">
-            {renderQuestionLabel('references')}
-          </label>
-          <textarea
-            name="references"
-            value={formData.references}
-            onChange={handleInputChange}
-            rows={3}
-            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-          />
-        </div>
-      )}
+      <div className={!hasQuestion('references') ? 'hidden' : ''}>
+        <label className="block text-white text-sm font-medium mb-2">
+          {renderQuestionLabel('references')}
+        </label>
+        <textarea
+          name="references"
+          value={formData.references}
+          onChange={handleInputChange}
+          rows={3}
+          required={Boolean(getQuestion('references')?.required)}
+          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+        />
+      </div>
 
       {(applicationType === 'delegate' || applicationType === 'chair') && (
         <>
@@ -1190,7 +1191,7 @@ const ApplicationForm = ({
                         rows={3}
                       />
                     </div>
-                     <div className={`md:col-span-2 ${!hasQuestion('delegateMotivationLetter') ? 'hidden' : ''}`}>
+                    <div className={`md:col-span-2 ${!hasQuestion('delegateMotivationLetter') ? 'hidden' : ''}`}>
                       <label className="block text-white text-sm font-medium mb-1">
                         {renderQuestionLabel('delegateMotivationLetter')}
                       </label>
@@ -1218,6 +1219,25 @@ const ApplicationForm = ({
                       >
                         {minimumWordsFor('delegateMotivationLetter') > 0 && `${getWordCount(d.motivationLetter)} / ${minimumWordsFor('delegateMotivationLetter')} words`}
                       </p>}
+                    </div>
+                    <div className={`md:col-span-2 ${!hasQuestion('delegateReferences') ? 'hidden' : ''}`}>
+                      <label className="block text-white text-sm font-medium mb-2">
+                        {renderQuestionLabel('delegateReferences')}
+                      </label>
+                      <textarea
+                        placeholder={getQuestion('delegateReferences')?.placeholder || undefined}
+                        value={d.references ?? ''}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'references',
+                            e.target.value
+                          )
+                        }
+                        required={Boolean(getQuestion('delegateReferences')?.required)}
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+                        rows={3}
+                      />
                     </div>
                     <div className={`md:col-span-2 ${!hasQuestion('delegateAdditionalInfo') ? 'hidden' : ''}`}>
                     <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateAdditionalInfo')}</label>

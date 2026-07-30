@@ -18,12 +18,12 @@ export const generateMetadata = async (): Promise<Metadata> => {
   });
 
   return {
-    title: `Secretariat`,
+    title: "Executive Team",
     description: description,
     alternates: { canonical: "/secretariat" },
-    keywords: [conference.shortName, "Secretariat", names],
+    keywords: [conference.shortName, "Executive Team", names],
     openGraph: {
-      title: `Secretariat`,
+      title: "Executive Team",
       description: description,
       url: `${normalizeSiteUrl(conference.siteUrl)}/secretariat`,
     },
@@ -50,6 +50,7 @@ const Secretariat = async () => {
                 secretariatName={secretariat.name}
                 role={secretariat.role}
                 slug={secretariat.slug}
+                hasDetails={Boolean(secretariat.role.trim() || secretariat.bio.trim() || secretariat.instagram)}
                 align={index % 2 !== 0 ? 'right' : 'left'}
               />
           ))}

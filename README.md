@@ -12,13 +12,13 @@ Conference-specific content is stored in [`config/conference.json`](C:/Desktop/s
 - application labels, option lists, validation messages, committee choices, and separate `form.questions` sections for delegate, chair, delegation, press, and admin applications
 - navigation, ordered `copy.letters.entries` content, footer, and page metadata copy
 
-Committee and Secretariat content is database-backed and managed from `/admin`; it is intentionally not duplicated in JSON.
+Committee and Executive Team content is database-backed and managed from `/admin`; it is intentionally not duplicated in JSON.
 
 ## Admin panel
 
 After logging in at `/admin`, administrators can:
 
-- create, edit, publish, order, and delete committees and Secretariat members
+- create, edit, publish, order, and delete committees and Executive Team members
 - edit conference names, dates, countdown start, hashtag, location, organizer details, and site URL
 - edit each application card/form title and description
 - enable or disable each application type; disabled types disappear from `/apply` and reject direct form/API requests
@@ -49,7 +49,7 @@ Before deploying, set the database, Resend, Google Sheets, and admin authenticat
 
 For local application API testing, set `DISABLE_EMAIL_SENDING=true`. The API stores the verification code and logs it locally instead of sending through Resend. Remove the flag or set it to `false` before testing real email delivery or deploying.
 
-After logging in at `/admin`, committees and Secretariat members, conference settings, application availability, form rules, application questions, and the letters page are managed from the same dashboard. Questions can be edited, added, or deleted per application type. The bottom of the Application Questions section also provides ordered, tab-separated Google Sheets headers ready to paste into cell `A1`. The image fields can upload PNG, JPG, WebP, and GIF files up to 10 MB directly to Vercel Blob; set `BLOB_STORE_ID` and `BLOB_READ_WRITE_TOKEN` in `.env.local` and your deployment environment.
+After logging in at `/admin`, committees and Executive Team members, conference settings, application availability, form rules, application questions, and the letters page are managed from the same dashboard. Questions can be edited, added, or deleted per application type. The bottom of the Application Questions section also provides ordered, tab-separated Google Sheets headers ready to paste into cell `A1`. The image fields can upload PNG, JPG, WebP, and GIF files up to 10 MB directly to Vercel Blob; set `BLOB_STORE_ID` and `BLOB_READ_WRITE_TOKEN` in `.env.local` and your deployment environment.
 
 ## Google Sheets headers
 

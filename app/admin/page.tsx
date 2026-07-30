@@ -109,20 +109,20 @@ export default async function AdminPage() {
           </div>
 
           <div className="rounded-xl border border-white/10 bg-black/25 p-6">
-            <h2 className="mb-4 text-2xl font-bold">Secretariat</h2>
+            <h2 className="mb-4 text-2xl font-bold">Executive Team</h2>
             <div className="space-y-3">
               {secretariat.map((member) => (
                 <div key={member.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-4 py-3">
                   <div>
                     <p className="font-semibold">{member.name}</p>
-                    <p className="text-sm text-gray-300">{member.role}</p>
+                    {member.role && <p className="text-sm text-gray-300">{member.role}</p>}
                   </div>
                   <Link className="text-sm font-semibold text-[var(--color-accent)]" href={`/admin/secretariat/${member.id}`}>
                     Edit
                   </Link>
                 </div>
               ))}
-              {secretariat.length === 0 && <p className="text-sm text-gray-300">No secretariat members yet.</p>}
+              {secretariat.length === 0 && <p className="text-sm text-gray-300">No Executive Team members yet.</p>}
             </div>
           </div>
         </section>
@@ -147,15 +147,15 @@ export default async function AdminPage() {
           </form>
 
           <form action={createSecretariatAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
-            <h2 className="text-2xl font-bold">New Secretariat Member</h2>
+            <h2 className="text-2xl font-bold">New Executive Team Member</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <NameAndSlugFields basePath="/secretariat" />
-              <Field label="Role" name="role" required />
+              <Field label="Role (optional)" name="role" />
               <Field label="Sort Order" name="sortOrder" type="number" />
               <ImageUrlField name="imageUrl" id="secretariat-image-url" required />
               <Field label="Instagram URL" name="instagram" />
             </div>
-            <Textarea label="Bio" name="bio" required />
+            <Textarea label="Bio (optional)" name="bio" />
             <label className="flex items-center gap-2 text-sm text-white">
               <input name="isPublished" type="checkbox" defaultChecked />
               Published
@@ -169,7 +169,7 @@ export default async function AdminPage() {
         <section id="conference-settings" className="flex flex-col gap-6">
           <div>
             <h2 className="text-3xl font-bold">Site Settings</h2>
-            <p className="mt-2 text-sm text-white/65">Conference content, applications, letters, visibility, and form rules are managed here alongside committees and Secretariat.</p>
+            <p className="mt-2 text-sm text-white/65">Conference content, applications, letters, visibility, and form rules are managed here alongside committees and the Executive Team.</p>
           </div>
           <AdminSettingsForm settings={settings} action={saveConferenceSettingsAction} />
         </section>

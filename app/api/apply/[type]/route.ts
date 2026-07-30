@@ -171,7 +171,7 @@ async function sendVerificationEmail(
         <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0;">
           ${code}
         </div>
-        <p>Best regards,<br/>${conference.brandName} Secretariat</p>
+        <p>Best regards,<br/>${conference.brandName} Executive Team</p>
       </div>
     `
       : `
@@ -183,7 +183,7 @@ async function sendVerificationEmail(
         <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0;">
           ${code}
         </div>
-        <p>Saygilarimizla,<br/>${conference.brandName} Sekreteryasi</p>
+        <p>Saygilarimizla,<br/>${conference.brandName} Executive Team</p>
       </div>
     `;
 

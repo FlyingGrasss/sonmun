@@ -8,12 +8,14 @@ const Card = ({
     secretariatName, 
     role, 
     slug,
+    hasDetails = false,
     align = 'left' 
 }: { 
     imageUrl: string, 
     secretariatName: string, 
     role?: string,
     slug: string,
+    hasDetails?: boolean,
     align?: 'left' | 'right'
 }) => {
 
@@ -45,7 +47,7 @@ const Card = ({
             </h3>
         )}
 
-        <div className="flex gap-4 mt-4">
+        {hasDetails && <div className="flex gap-4 mt-4">
             <Link href={`/secretariat/${slug}`}>
                 <button className={`group glassmorphism text-lg cursor-pointer items-center transition-all duration-300 justify-center gap-3 inline-flex backdrop-blur-md rounded-full px-8 py-3 shadow-lg border border-white/20 hover:border-[var(--color-accent)] ${isImageRight ? 'flex-row' : 'flex-row-reverse'}`}>
                     <span>Read More</span>
@@ -69,7 +71,7 @@ const Card = ({
                     </svg>
                 </button>
             </Link>
-        </div>
+        </div>}
       </div>
     </div>
   )

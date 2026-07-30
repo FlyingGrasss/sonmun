@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const siteUrl = normalizeSiteUrl(conference.siteUrl);
   
   return {
-    title: `${member.name} - Secretariat`,
+    title: `${member.name} - Executive Team`,
     description: formatConferenceText(COPY.metadata.secretariatDetailDescription, {
       memberName: member.name,
       role: member.role,
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: member.name,
       url: `${siteUrl}/secretariat/${member.slug}`,
-      images: [{ url: member.imageUrl, alt: `${member.name}, ${member.role}` }],
+      images: [{ url: member.imageUrl, alt: member.role ? `${member.name}, ${member.role}` : member.name }],
     },
   };
 }
@@ -73,11 +73,12 @@ const SecretariatPage = async ({ params }: { params: Promise<{ slug: string }> }
 
          <div className="w-full md:w-2/3">
             <h1 className="text-6xl max-sm:text-3xl font-bold text-white mb-2">{member.name}</h1>
-            <h2 className="text-3xl max-sm:text-xl text-[var(--color-accent)] mb-8 font-semibold">{member.role}</h2>
-            
-            <div className="prose max-w-none">
+            {member.role && <h2 className="text-3xl max-sm:text-xl text-[var(--color-accent)] mb-8 font-semibold">{member.role}</h2>}
+            {member.bio && (
+              <div className="prose max-w-none">
                 <RichText value={member.bio} />
-            </div>
+              </div>
+            )}
          </div>
       </div>
     </div>

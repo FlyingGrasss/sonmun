@@ -20,6 +20,7 @@ type DelegateMember = {
   grade?: string;
   experience?: string;
   motivationLetter?: string;
+  references?: string;
   additionalInfo?: string;
 };
 
@@ -178,6 +179,7 @@ export async function POST(
       delegateGrade: delegate.grade,
       delegateExperience: delegate.experience,
       delegateMotivationLetter: delegate.motivationLetter,
+      delegateReferences: delegate.references,
       delegateAdditionalInfo: delegate.additionalInfo,
     });
     let values: (string | number | undefined)[][] = [];
