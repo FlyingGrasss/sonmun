@@ -33,7 +33,7 @@ export default async function EditSecretariatPage({
       <form action={updateAction} className="mx-auto flex max-w-3xl flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
         <Link href="/admin" className="text-sm text-[var(--color-accent)]">Back to dashboard</Link>
         <h1 className="text-3xl font-bold">Edit Executive Team Member</h1>
-        <NameAndSlugFields basePath="/secretariat" nameValue={member.name} slugValue={member.slug} />
+        <NameAndSlugFields basePath="/exec" nameValue={member.name} slugValue={member.slug} />
         <input name="role" defaultValue={member.role} placeholder="Role (optional)" className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <input name="sortOrder" type="number" defaultValue={member.sortOrder} className="rounded-lg border border-white/15 bg-white/10 px-3 py-2" />
         <ImageUrlField name="imageUrl" id="secretariat-image-url" defaultValue={member.imageUrl} required />
