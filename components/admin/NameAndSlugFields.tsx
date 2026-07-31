@@ -8,7 +8,7 @@ export default function NameAndSlugFields({
   nameValue = "",
   slugValue = "",
 }: {
-  basePath: "/committees" | "/secretariat";
+  basePath: "/committees" | "/exec";
   nameValue?: string;
   slugValue?: string;
 }) {
