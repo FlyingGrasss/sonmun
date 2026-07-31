@@ -1,7 +1,6 @@
 import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { THEME } from '@/lib/conference';
 import getMessage from '@/lib/getMessage';
 import { prisma } from '@/lib/prisma';
 import { getSiteSettings, type EditableSettings } from '@/lib/siteSettings';
@@ -124,8 +123,12 @@ export async function POST(
       },
     });
 
-    if (disableEmailSending) {
+    if (process.env.NODE_ENV !== 'production') {
       console.info(`[application-test] type=${type} email=${email} verificationCode=${code}`);
+    }
+
+    if (disableEmailSending) {
+      console.info(`[application-test] email sending disabled for type=${type}`);
     } else {
       await sendVerificationEmail(email, name, code, lang, type, settings.conference);
     }
@@ -164,7 +167,7 @@ async function sendVerificationEmail(
     lang === 'en'
       ? `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: ${THEME.accent};">${conference.shortName} ${title} Application</h1>
+        <h1 style="color: #8c5847;">${conference.shortName} ${title} Application</h1>
         <p>Dear ${name},</p>
         <p>Thank you for applying!</p>
         <p>Your verification code is:</p>
@@ -176,7 +179,7 @@ async function sendVerificationEmail(
     `
       : `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: ${THEME.accent};">${conference.shortName} ${title} Basvurusu</h1>
+        <h1 style="color: #8c5847;">${conference.shortName} ${title} Basvurusu</h1>
         <p>Sayin ${name},</p>
         <p>Basvurunuz icin tesekkurler!</p>
         <p>Dogrulama kodunuz:</p>

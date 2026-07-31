@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import getMessage from '@/lib/getMessage';
 import { getSiteSettings } from '@/lib/siteSettings';
+import { DELEGATION_SHARED_FIELDS } from '@/lib/applicationSheetHeaders';
 
 type DelegateMember = {
   fullName?: string;
@@ -132,6 +133,22 @@ export async function POST(
         }
       }
     };
+    const delegationSharedFields = DELEGATION_SHARED_FIELDS.filter(({ summaryId, delegateId }) =>
+      questionDefinitions.some((question) => question.id === summaryId || question.id === delegateId)
+    );
+    const delegationSharedIds = new Set(
+      delegationSharedFields.flatMap(({ summaryId, delegateId }) => [summaryId, delegateId])
+    );
+    const addDelegationValues = (
+      row: (string | number | undefined)[],
+      values: Record<string, string | number | undefined>,
+      side: 'summary' | 'delegate'
+    ) => {
+      for (const { summaryId, delegateId } of delegationSharedFields) {
+        row.push(values[side === 'summary' ? summaryId : delegateId] ?? '');
+      }
+      addOrderedValues(row, values, delegationSharedIds);
+    };
     const mainValues: Record<string, string | number | undefined> = {
       ...Object.fromEntries(Object.entries(formData).filter(([key]) => key !== 'customAnswers')),
       email,
@@ -186,12 +203,12 @@ export async function POST(
 
     if (type === 'delegation') {
       const summary: (string | number | undefined)[] = [];
-      addOrderedValues(summary, {
+      addDelegationValues(summary, {
         schoolName: formData.school,
         numberOfDelegates: formData.numberOfDelegates,
         contactEmail: email,
         ...(formData.customAnswers ?? {}),
-      }, new Set(questionDefinitions.filter((question) => question.id.startsWith('delegate') || question.id.startsWith('choice') || question.id === 'choice').map((question) => question.id)));
+      }, 'summary');
       values.push(summary);
       if (Array.isArray(formData.delegates)) {
         for (const delegate of formData.delegates) {
@@ -202,7 +219,7 @@ export async function POST(
         }
         formData.delegates.forEach((delegate) => {
           const row: (string | number | undefined)[] = [];
-          addOrderedValues(row, delegateValues(delegate), new Set(['schoolName', 'numberOfDelegates', 'contactEmail']));
+          addDelegationValues(row, delegateValues(delegate), 'delegate');
           values.push(row);
         });
       }

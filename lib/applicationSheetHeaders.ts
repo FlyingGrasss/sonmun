@@ -10,6 +10,12 @@ export type SheetHeaderRow = {
   text: string;
 };
 
+export const DELEGATION_SHARED_FIELDS = [
+  { summaryId: "schoolName", delegateId: "delegateFullName" },
+  { summaryId: "numberOfDelegates", delegateId: "delegateBirthDate" },
+  { summaryId: "contactEmail", delegateId: "delegateNationalId" },
+] as const;
+
 function questionMap(questions: QuestionGroups, type: string) {
   return new Map((questions[type] ?? []).map((question) => [question.id, question]));
 }
@@ -34,17 +40,13 @@ function labelFor(map: Map<string, QuestionDefinition>, id: string, fallback = "
 export function getApplicationSheetHeaders(questions: QuestionGroups, rules: FormRules): SheetHeaderRow[] {
   const rows: SheetHeaderRow[] = [];
   const delegationMap = questionMap(questions, "delegation");
-  const delegation = [
-    ["schoolName", "delegateFullName"],
-    ["numberOfDelegates", "delegateBirthDate"],
-    ["contactEmail", "delegateNationalId"],
-  ].map(([summaryId, delegateId]) => {
+  const delegation = DELEGATION_SHARED_FIELDS.map(({ summaryId, delegateId }) => {
     const summaryLabel = labelFor(delegationMap, summaryId);
     const delegateLabel = labelFor(delegationMap, delegateId);
     return summaryLabel && delegateLabel ? `${summaryLabel} / ${delegateLabel}` : summaryLabel || delegateLabel;
   });
   const remainingDelegation = (questions.delegation ?? [])
-    .filter((question) => !["schoolName", "numberOfDelegates", "contactEmail", "delegateFullName", "delegateBirthDate", "delegateNationalId"].includes(question.id))
+    .filter((question) => !DELEGATION_SHARED_FIELDS.some(({ summaryId, delegateId }) => question.id === summaryId || question.id === delegateId))
     .flatMap((question) => question.id === "choice"
       ? Array.from({ length: rules.committeePreferenceCount }, (_, index) => `${index + 1}. ${question.label}`)
       : [question.label]);

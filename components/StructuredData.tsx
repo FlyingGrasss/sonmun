@@ -2,12 +2,13 @@ import { ASSETS } from "@/lib/conference";
 import { normalizeSiteUrl, type EditableSettings } from "@/lib/siteSettings";
 
 function getEndDateIso(startDateIso: string, dates: string) {
-  const dateCount = dates.match(/\d+/g)?.length ?? 1;
+  const dayRange = dates.match(/^\s*\d{1,2}(?:\s*[-–—/]\s*\d{1,2})*/)?.[0];
+  const days = dayRange?.match(/\d{1,2}/g)?.map(Number) ?? [];
   const endDate = new Date(startDateIso);
 
-  if (Number.isNaN(endDate.getTime())) return undefined;
+  if (Number.isNaN(endDate.getTime()) || days.length === 0) return undefined;
 
-  endDate.setUTCDate(endDate.getUTCDate() + Math.max(0, dateCount - 1));
+  endDate.setUTCDate(endDate.getUTCDate() + Math.max(0, (days.at(-1) ?? days[0]) - days[0]));
   return endDate.toISOString();
 }
 
