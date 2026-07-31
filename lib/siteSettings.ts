@@ -18,6 +18,7 @@ export type EditableLetter = {
   titleHighlight: string;
   opening: string;
   paragraphs: string[];
+  author?: string;
 };
 
 export type EditableSettings = {
@@ -111,6 +112,7 @@ export const fallbackSettings: EditableSettings = {
       titleHighlight: letter.titleHighlight,
       opening: letter.opening,
       paragraphs: [...letter.paragraphs],
+      author: (letter as Record<string, unknown>).author as string | undefined,
     })),
   },
 };
@@ -131,6 +133,7 @@ function normalizeLetter(value: unknown, index: number, fallback: EditableLetter
     titleHighlight: typeof source.titleHighlight === "string" ? source.titleHighlight.trim() : fallback.titleHighlight,
     opening: typeof source.opening === "string" ? source.opening.trim() : fallback.opening,
     paragraphs,
+    author: typeof source.author === "string" && source.author.trim() ? source.author.trim() : fallback.author,
   };
 }
 
