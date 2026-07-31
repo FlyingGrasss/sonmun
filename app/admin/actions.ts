@@ -218,6 +218,7 @@ export async function saveConferenceSettingsAction(formData: FormData) {
       titleHighlight: stringValue(formData, `${prefix}_titleHighlight`),
       opening: stringValue(formData, `${prefix}_opening`),
       paragraphs,
+      author: stringValue(formData, `${prefix}_author`),
     };
   });
 
