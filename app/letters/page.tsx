@@ -29,15 +29,15 @@ const Letters = async () => {
     <div className="pb-20">
       <h1 className="sr-only">Letters</h1>
       {letters.entries.map((letter) => (
-        <section key={letter.id}>
-          <h2 className="text-6xl max-sm:text-4xl mt-20 mb-20 text-center text-white font-bold tracking-tight">
+        <section key={letter.id} className="mb-24 max-sm:mb-16">
+          <h2 className="text-6xl max-sm:text-4xl mt-10 mb-4 max-sm:mt-8 max-sm:mb-3 text-center text-white font-bold tracking-tight">
             {letter.titlePrefix} <br className="sm:hidden" />{" "}
             <span className="text-[var(--color-accent)] font-black">
               {letter.titleHighlight}
             </span>
           </h2>
 
-          <article className="text-white mx-auto w-[1000px] max-sm:w-[350px] max-sm:text-sm text-2xl bg-black/60 relative rounded-4xl max-sm:rounded-2xl max-sm:px-8 max-sm:py-4 max-sm:my-6 px-16 py-8 my-12">
+          <article className="text-white mx-auto w-[1000px] max-sm:w-[350px] max-sm:text-sm text-2xl bg-black/60 relative rounded-4xl max-sm:rounded-2xl max-sm:px-8 max-sm:py-6 px-16 py-8">
             {formatConferenceText(letter.opening, textReplacements)}
             <br />
             <br />
@@ -50,7 +50,7 @@ const Letters = async () => {
             <br />
             <br />
             <span className="text-[var(--color-accent)] font-black">
-              {conference.organizer.name}
+              {letter.author || letter.signer || conference.organizer.name}
             </span>
             <br />
             {conference.hashtag}
