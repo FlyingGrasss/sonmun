@@ -7,7 +7,7 @@ import { ASSETS, COPY } from "@/lib/conference";
 const links: { href: string; label: string; icon: NavigationIconName }[] = [
   { href: "/", label: COPY.navigation.home, icon: "home" },
   { href: "/letters", label: COPY.navigation.letters, icon: "letters" },
-  { href: "/secretariat", label: COPY.navigation.secretariat, icon: "secretariat" },
+  { href: "/exec", label: COPY.navigation.secretariat, icon: "secretariat" },
   { href: "/committees", label: COPY.navigation.committees, icon: "committees" },
 ];
 
