@@ -18,7 +18,7 @@ export default function MobileMenu({ showCommittees, showSecretariat }: { showCo
   const pathname = usePathname();
   const visibleLinks = links.filter((link) =>
     (link.href !== "/committees" || showCommittees) &&
-    (link.href !== "/secretariat" || showSecretariat)
+    (link.href !== "/exec" || showSecretariat)
   );
   const isActive = (path: string) => pathname === path;
 
