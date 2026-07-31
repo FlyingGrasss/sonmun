@@ -193,7 +193,7 @@ async function sendVerificationEmail(
   if (!resend) return;
 
   const { error: resendError } = await resend.emails.send({
-    from: `${conference.brandName} Team <${fromEmail}>`,
+    from: `"${conference.brandName} Executive Team" <${fromEmail}>`,
     to: email,
     subject: emailSubject,
     html: htmlContent,
