@@ -1,7 +1,3 @@
-// app/secretariat/page.tsx
-
-export const revalidate = 60;
-
 import SecretariatCard from "@/components/SecretariatCard";
 import { COPY, formatConferenceText } from "@/lib/conference";
 import { getPublishedSecretariat } from "@/lib/content";
@@ -45,12 +41,10 @@ const Secretariat = async () => {
         <div className="flex flex-col items-center gap-24 md:gap-32">
           {allSecretariat.map((secretariat, index) => (
               <SecretariatCard
-                key={index}
+                key={secretariat.id || index}
                 imageUrl={secretariat.imageUrl}
                 secretariatName={secretariat.name}
                 role={secretariat.role}
-                slug={secretariat.slug}
-                hasDetails={Boolean(secretariat.role.trim() || secretariat.bio.trim() || secretariat.instagram)}
                 align={index % 2 !== 0 ? 'right' : 'left'}
               />
           ))}
