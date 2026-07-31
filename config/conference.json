@@ -14,7 +14,7 @@
       "city": "Izmir",
       "country": "Turkey"
     },
-    "siteUrl": "https://sonmun.vercel.app",
+    "siteUrl": "https://sonmun.com.tr",
     "locale": "en_US",
     "keywords": [
       "MUN",
@@ -283,7 +283,7 @@
     "navigation": {
       "home": "Home",
       "letters": "Letters",
-      "secretariat": "Executive Team",
+      "exec": "Executive Team",
       "committees": "Committees",
       "apply": "Apply"
     },
