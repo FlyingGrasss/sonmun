@@ -1,5 +1,3 @@
-// components/ApplicationForm.tsx
-
 "use client";
 
 /* eslint-disable react-hooks/set-state-in-effect */
@@ -342,8 +340,8 @@ const ApplicationForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setMainPageMessage({ text: '', isError: false }); // Clear main page message
-    setModalMessage({ text: '', isError: false }); // Clear modal message
+    setMainPageMessage({ text: '', isError: false });
+    setModalMessage({ text: '', isError: false });
 
     for (const question of questionDefinitions) {
       const value = formData.customAnswers[question.id]?.trim() ?? '';
@@ -362,8 +360,6 @@ const ApplicationForm = ({
       }
     }
 
-    // Explicit Chair Validation for Word Count
-    // Word Count Validation
     if (applicationType !== 'delegation' && hasQuestion('motivationLetter')) {
       const minimumWords = minimumWordsFor('motivationLetter');
       if (minimumWords > 0 && getWordCount(formData.motivationLetter) < minimumWords) {
@@ -376,7 +372,6 @@ const ApplicationForm = ({
         return;
       }
     } else if (applicationType === 'delegation' && hasQuestion('delegateMotivationLetter')) {
-      // Validate all delegates
       const minimumWords = minimumWordsFor('delegateMotivationLetter');
       for (let i = 0; i < delegates.length; i++) {
         if (minimumWords > 0 && getWordCount(delegates[i].motivationLetter) < minimumWords) {
@@ -414,14 +409,12 @@ const ApplicationForm = ({
 
       const result = await response.json();
       if (!response.ok) {
-        // If it's a specific error (like email_exists or rate limit), show it on main page
         if (response.status === 400 || response.status === 429) {
           setMainPageMessage({
             text: result.message || 'Error occurred',
             isError: true
           });
         } else {
-          // Other errors might still go to modal or default error
           setModalMessage({
             text: result.message || 'Failed to submit application',
             isError: true
@@ -432,11 +425,9 @@ const ApplicationForm = ({
       setMainPageMessage({
         text: result.message,
         isError: false
-      }); // Usually "Verification email sent"
+      });
       setVerificationModalOpen(true);
     } catch (error) {
-      // If error already handled for main page, do nothing here.
-      // Otherwise, set a generic error on main page.
       if (!mainPageMessage.text) {
         setMainPageMessage({
           text:
@@ -454,7 +445,7 @@ const ApplicationForm = ({
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setModalMessage({ text: '', isError: false }); // Clear previous modal message
+    setModalMessage({ text: '', isError: false });
 
     let verificationBody: Record<string, unknown> = {
       code: verificationCode,
@@ -491,13 +482,12 @@ const ApplicationForm = ({
         throw new Error(result.message || 'Failed');
       }
 
-      // Clear local storage on success
       localStorage.removeItem(storageKey);
       localStorage.removeItem(delegatesStorageKey);
 
       window.location.href = '/success';
     } catch {
-      // Message already set in modalMessage state for display
+      // Message already set in modalMessage state
     } finally {
       setIsSubmitting(false);
     }
@@ -522,12 +512,7 @@ const ApplicationForm = ({
   const shouldShowCustomQuestion = (question: QuestionDefinition) =>
     question.id !== 'magnificentCenturyKnowledge' ||
     (applicationType !== 'delegation' && formData.committeePreferences.includes('FKK: Muhteşem Yüzyıl'));
-  const customQuestions = questionDefinitions.filter((question) =>
-    !builtInQuestionKeys.has(question.id) &&
-    !question.id.startsWith('choice') &&
-    question.label.trim().length > 0 &&
-    shouldShowCustomQuestion(question)
-  );
+
   const controlClass = "mt-2 w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all";
   const renderCustomControl = (key: string, question: QuestionDefinition) => {
     const name = `customQuestion_${key}`;
@@ -542,18 +527,7 @@ const ApplicationForm = ({
     const inputType = question.type === 'date' || question.type === 'number' || question.type === 'phone' ? question.type : 'text';
     return <input name={name} type={inputType === 'phone' ? 'tel' : inputType} value={value} onChange={onChange} placeholder={question.placeholder || undefined} min={question.id === 'magnificentCenturyKnowledge' ? 0 : undefined} max={question.id === 'magnificentCenturyKnowledge' ? 10 : undefined} minLength={inputType === 'text' || inputType === 'phone' ? question.minCharacters || undefined : undefined} required={question.required} className={controlClass} />;
   };
-  const renderCustomQuestionFields = (questionsToRender: QuestionDefinition[]) => questionsToRender.length > 0 ? (
-    <div className="space-y-4 md:col-span-2">
-      {questionsToRender.map((question) => (
-        <label key={question.id} className="block text-white text-sm font-medium">
-          {renderQuestionLabel(question.id, question.label)}
-          {renderCustomControl(question.id, question)}
-        </label>
-      ))}
-    </div>
-  ) : null;
-  const magnificentCenturyQuestionFields = renderCustomQuestionFields(customQuestions.filter((question) => question.id === 'magnificentCenturyKnowledge'));
-  const customQuestionFields = renderCustomQuestionFields(customQuestions.filter((question) => question.id !== 'magnificentCenturyKnowledge'));
+
   const commonFields = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className={!hasQuestion(applicationType === 'delegation' ? 'schoolName' : 'fullName') ? 'hidden' : ''}>
@@ -709,203 +683,246 @@ const ApplicationForm = ({
   const firstChoiceQuestion = getChoiceQuestion(0);
   const committeeOptions = firstChoiceQuestion && firstChoiceQuestion.options.length > 0 ? firstChoiceQuestion.options : COMMITTEES;
 
+  const renderFieldByQuestion = (question: QuestionDefinition) => {
+    const key = question.id;
+
+    if (!builtInQuestionKeys.has(key) && !key.startsWith('choice')) {
+      if (!shouldShowCustomQuestion(question)) return null;
+      return (
+        <div key={key}>
+          <label className="block text-white text-sm font-medium mb-2">
+            {renderQuestionLabel(key, question.label)}
+          </label>
+          {renderCustomControl(key, question)}
+        </div>
+      );
+    }
+
+    switch (key) {
+      case 'motivationLetter':
+        return (
+          <div key={key} className={!hasQuestion('motivationLetter') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('motivationLetter')}
+            </label>
+            <textarea
+              name="motivationLetter"
+              value={formData.motivationLetter}
+              onChange={handleInputChange}
+              rows={5}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+              minLength={getQuestion('motivationLetter')?.minCharacters || undefined}
+              required={hasQuestion('motivationLetter')}
+            />
+            {minimumWordsFor('motivationLetter') > 0 && <p
+              className={`text-sm mt-1 text-left ${
+                getWordCount(formData.motivationLetter) >= minimumWordsFor('motivationLetter')
+                  ? 'text-green-500'
+                  : 'text-red-500'
+              }`}
+            >
+              {`${getWordCount(formData.motivationLetter)} / ${minimumWordsFor('motivationLetter')} words`}
+            </p>}
+          </div>
+        );
+
+      case 'experience':
+        return (
+          <div key={key} className={!hasQuestion('experience') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('experience')}
+            </label>
+            <textarea
+              name="experience"
+              value={formData.experience}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+            />
+          </div>
+        );
+
+      case 'references':
+        return (
+          <div key={key} className={!hasQuestion('references') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('references')}
+            </label>
+            <textarea
+              name="references"
+              value={formData.references}
+              onChange={handleInputChange}
+              rows={3}
+              required={Boolean(getQuestion('references')?.required)}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+            />
+          </div>
+        );
+
+      case 'englishLevel':
+        if (applicationType === 'delegation' || applicationType === 'chair') return null;
+        return (
+          <div key={key} className={!hasQuestion('englishLevel') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('englishLevel')}
+            </label>
+            <select
+              name="englishLevel"
+              value={formData.englishLevel}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+              required={hasQuestion('englishLevel')}
+            >
+              <option value="">{FORM.placeholders.selectEnglishLevel}</option>
+              {englishOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case 'camera':
+        if (applicationType !== 'press') return null;
+        return (
+          <div key={key} className={!hasQuestion('camera') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('camera')}
+            </label>
+            <input
+              name="camera"
+              value={formData.camera}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+            />
+          </div>
+        );
+
+      case 'dietaryPreferences':
+        return (
+          <div key={key} className={!hasQuestion('dietaryPreferences') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('dietaryPreferences')}
+            </label>
+            <select
+              name="dietaryPreferences"
+              value={formData.dietaryPreferences}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+            >
+              <option value="">{FORM.messages.selectNone}</option>
+              {dietaryOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case 'additionalInfo':
+        return (
+          <div key={key} className={!hasQuestion('additionalInfo') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('additionalInfo')}
+            </label>
+            <textarea
+              name="additionalInfo"
+              value={formData.additionalInfo}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+            />
+          </div>
+        );
+
+      case 'chairAnswer1':
+        if (applicationType !== 'chair' || !hasGeneralAssemblyCommittee(formData.committeePreferences)) return null;
+        return (
+          <div key={key} className={!hasQuestion('chairAnswer1') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('chairAnswer1')}
+            </label>
+            <textarea
+              name="chairAnswer1"
+              value={formData.chairAnswer1}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+              rows={4}
+            />
+          </div>
+        );
+
+      case 'chairAnswer2':
+        if (applicationType !== 'chair') return null;
+        return (
+          <div key={key} className={!hasQuestion('chairAnswer2') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('chairAnswer2')}
+            </label>
+            <textarea
+              name="chairAnswer2"
+              value={formData.chairAnswer2}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+              rows={4}
+            />
+          </div>
+        );
+
+      case 'chairAnswer3':
+        if (applicationType !== 'chair' || !hasCrisisCommittee(formData.committeePreferences)) return null;
+        return (
+          <div key={key} className={!hasQuestion('chairAnswer3') ? 'hidden' : ''}>
+            <label className="block text-white text-sm font-medium mb-2">
+              {renderQuestionLabel('chairAnswer3')}
+            </label>
+            <textarea
+              name="chairAnswer3"
+              value={formData.chairAnswer3}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+              rows={4}
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   const detailFields = (
     <div className="space-y-6">
-      <div className={!hasQuestion('motivationLetter') ? 'hidden' : ''}>
-        <label className="block text-white text-sm font-medium mb-2">
-          {renderQuestionLabel('motivationLetter')}
-        </label>
-        <textarea
-          name="motivationLetter"
-          value={formData.motivationLetter}
-          onChange={handleInputChange}
-          rows={5}
-          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-          minLength={getQuestion('motivationLetter')?.minCharacters || undefined}
-          required={hasQuestion('motivationLetter')}
-        />
-        {minimumWordsFor('motivationLetter') > 0 && <p
-          className={`text-sm mt-1 text-left ${
-            getWordCount(formData.motivationLetter) >= minimumWordsFor('motivationLetter')
-              ? 'text-green-500'
-              : 'text-red-500'
-          }`}
-        >
-          {minimumWordsFor('motivationLetter') > 0 && `${getWordCount(formData.motivationLetter)} / ${minimumWordsFor('motivationLetter')} words`}
-        </p>}
-      </div>
-
-      <div className={!hasQuestion('experience') ? 'hidden' : ''}>
-        <label className="block text-white text-sm font-medium mb-2">
-          {renderQuestionLabel('experience')}
-        </label>
-        <textarea
-          name="experience"
-          value={formData.experience}
-          onChange={handleInputChange}
-          rows={4}
-          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-        />
-      </div>
-
-      <div className={!hasQuestion('references') ? 'hidden' : ''}>
-        <label className="block text-white text-sm font-medium mb-2">
-          {renderQuestionLabel('references')}
-        </label>
-        <textarea
-          name="references"
-          value={formData.references}
-          onChange={handleInputChange}
-          rows={3}
-          required={Boolean(getQuestion('references')?.required)}
-          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-        />
-      </div>
-
-      {(applicationType === 'delegate' || applicationType === 'chair') && (
-        <>
-          <div className={!hasCommitteeChoices ? 'hidden' : ''}>
-            <div className="space-y-3">
-              {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
-                <label key={idx} className="block text-white text-sm font-medium">
-                  {renderQuestionLabel(`choice${idx + 1}`, `${idx + 1}. Committee Choice`)}
-                <select
-                  value={formData.committeePreferences[idx]}
-                  onChange={(e) =>
-                    handleCommitteeChange(idx, e.target.value)
-                  }
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                  required={Boolean(getChoiceQuestion(idx)?.required)}
-                >
-                  <option value="">
-                    {getChoiceQuestion(idx)?.label || `${idx + 1}. Committee Choice`}
-                  </option>
-                  {committeeOptions.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {magnificentCenturyQuestionFields}
-
-          {applicationType === 'chair' ? (
-            <div className="space-y-6">
-              {hasGeneralAssemblyCommittee(formData.committeePreferences) && (
-           <div className={!hasQuestion('chairAnswer1') ? 'hidden' : ''}>
-                  <label className="block text-white text-sm font-medium mb-2">
-                    {renderQuestionLabel('chairAnswer1')}
-                  </label>
-                  <textarea
-                    name="chairAnswer1"
-                    value={formData.chairAnswer1}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                    rows={4}
-                  />
-                </div>
-              )}
-              {hasCrisisCommittee(formData.committeePreferences) && (
-           <div className={!hasQuestion('chairAnswer3') ? 'hidden' : ''}>
-                  <label className="block text-white text-sm font-medium mb-2">
-                    {renderQuestionLabel('chairAnswer3')}
-                  </label>
-                  <textarea
-                    name="chairAnswer3"
-                    value={formData.chairAnswer3}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                    rows={4}
-                  />
-                </div>
-              )}
-           <div className={!hasQuestion('chairAnswer2') ? 'hidden' : ''}>
-                <label className="block text-white text-sm font-medium mb-2">
-                  {renderQuestionLabel('chairAnswer2')}
-                </label>
-                <textarea
-                  name="chairAnswer2"
-                  value={formData.chairAnswer2}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                  rows={4}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className={!hasQuestion('englishLevel') ? 'hidden' : ''}>
-              <label className="block text-white text-sm font-medium mb-2">
-                {renderQuestionLabel('englishLevel')}
-              </label>
+      {(applicationType === 'delegate' || applicationType === 'chair') && hasCommitteeChoices && (
+        <div className="space-y-3">
+          {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
+            <label key={idx} className="block text-white text-sm font-medium">
+              {renderQuestionLabel(`choice${idx + 1}`, `${idx + 1}. Committee Choice`)}
               <select
-                name="englishLevel"
-                value={formData.englishLevel}
-                onChange={handleInputChange}
+                value={formData.committeePreferences[idx]}
+                onChange={(e) => handleCommitteeChange(idx, e.target.value)}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                 required={hasQuestion('englishLevel')}
+                required={Boolean(getChoiceQuestion(idx)?.required)}
               >
-                <option value="">{FORM.placeholders.selectEnglishLevel}</option>
-                {englishOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                <option value="">
+                  {getChoiceQuestion(idx)?.label || `${idx + 1}. Committee Choice`}
+                </option>
+                {committeeOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
                   </option>
                 ))}
               </select>
-            </div>
-          )}
-        </>
-      )}
-
-      {applicationType === 'press' && (
-        <div className={!hasQuestion('camera') ? 'hidden' : ''}>
-          <label className="block text-white text-sm font-medium mb-2">
-            {renderQuestionLabel('camera')}
-          </label>
-          <input
-            name="camera"
-            value={formData.camera}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-          />
+            </label>
+          ))}
         </div>
       )}
 
-      <div className={!hasQuestion('dietaryPreferences') ? 'hidden' : ''}>
-        <label className="block text-white text-sm font-medium mb-2">
-          {renderQuestionLabel('dietaryPreferences')}
-        </label>
-        <select
-          name="dietaryPreferences"
-          value={formData.dietaryPreferences}
-          onChange={handleInputChange}
-          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-        >
-          <option value="">{FORM.messages.selectNone}</option>
-          {dietaryOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className={!hasQuestion('additionalInfo') ? 'hidden' : ''}>
-        <label className="block text-white text-sm font-medium mb-2">
-          {renderQuestionLabel('additionalInfo')}
-        </label>
-        <textarea
-          name="additionalInfo"
-          value={formData.additionalInfo}
-          onChange={handleInputChange}
-          rows={3}
-          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-        />
-      </div>
-      {customQuestionFields}
+      {questionDefinitions
+        .filter((q) => q.label.trim().length > 0)
+        .map((question) => renderFieldByQuestion(question))}
     </div>
   );
 
@@ -939,7 +956,7 @@ const ApplicationForm = ({
                   onChange={handleInputChange}
                   min={rules.minimumDelegates}
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                   required={hasQuestion('numberOfDelegates')}
+                  required={hasQuestion('numberOfDelegates')}
                 />
                 <button
                   type="button"
@@ -974,208 +991,208 @@ const ApplicationForm = ({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className={!hasQuestion('delegateFullName') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateFullName')}</label>
-                    <input
-                      placeholder={questions.delegateFullName}
-                      value={d.fullName}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'fullName',
-                          e.target.value
-                        )
-                      }
-                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateFullName') ? 'hidden' : ''}`}
-                       required={hasQuestion('delegateFullName')}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateFullName')}</label>
+                      <input
+                        placeholder={questions.delegateFullName}
+                        value={d.fullName}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'fullName',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateFullName') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateFullName')}
+                      />
                     </div>
                     <div className={!hasQuestion('delegateEmail') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEmail')}</label>
-                    <input
-                      placeholder={questions.delegateEmail}
-                      type="email"
-                      value={d.email}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'email',
-                          e.target.value
-                        )
-                      }
-                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEmail') ? 'hidden' : ''}`}
-                       required={hasQuestion('delegateEmail')}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEmail')}</label>
+                      <input
+                        placeholder={questions.delegateEmail}
+                        type="email"
+                        value={d.email}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'email',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEmail') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateEmail')}
+                      />
                     </div>
                     <div className={!hasQuestion('delegatePhoneNumber') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegatePhoneNumber')}</label>
-                    <input
-                      placeholder={questions.delegatePhoneNumber}
-                      type="tel"
-                      value={d.phoneNumber}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'phoneNumber',
-                          e.target.value
-                        )
-                      }
-                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegatePhoneNumber') ? 'hidden' : ''}`}
-                       required={hasQuestion('delegatePhoneNumber')}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegatePhoneNumber')}</label>
+                      <input
+                        placeholder={questions.delegatePhoneNumber}
+                        type="tel"
+                        value={d.phoneNumber}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'phoneNumber',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegatePhoneNumber') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegatePhoneNumber')}
+                      />
                     </div>
                     <div className={!hasQuestion('delegateNationalId') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateNationalId')}</label>
-                    <input
-                      placeholder={questions.delegateNationalId}
-                      value={d.nationalId}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'nationalId',
-                          e.target.value
-                        )
-                      }
-                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateNationalId') ? 'hidden' : ''}`}
-                       required={hasQuestion('delegateNationalId')}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateNationalId')}</label>
+                      <input
+                        placeholder={questions.delegateNationalId}
+                        value={d.nationalId}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'nationalId',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateNationalId') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateNationalId')}
+                      />
                     </div>
                     <div className={!hasQuestion('delegateBirthDate') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateBirthDate')}</label>
-                    <input
-                      placeholder={questions.delegateBirthDate}
-                      type="date"
-                      value={d.birthDate}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'birthDate',
-                          e.target.value
-                        )
-                      }
-                       className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateBirthDate') ? 'hidden' : ''}`}
-                       required={hasQuestion('delegateBirthDate')}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateBirthDate')}</label>
+                      <input
+                        placeholder={questions.delegateBirthDate}
+                        type="date"
+                        value={d.birthDate}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'birthDate',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateBirthDate') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateBirthDate')}
+                      />
                     </div>
 
                     <div className={!hasQuestion('delegateGender') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGender')}</label>
-                    <select
-                      value={d.gender}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'gender',
-                          e.target.value
-                        )
-                      }
-                      className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateGender') ? 'hidden' : ''}`}
-                      required={hasQuestion('delegateGender')}
-                    >
-                      <option value="">{FORM.placeholders.selectGenderRequired}</option>
-                      {genderOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGender')}</label>
+                      <select
+                        value={d.gender}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'gender',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateGender') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateGender')}
+                      >
+                        <option value="">{FORM.placeholders.selectGenderRequired}</option>
+                        {genderOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className={!hasQuestion('delegateGrade') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGrade')}</label>
-                    <select
-                      value={d.grade}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'grade',
-                          e.target.value
-                        )
-                      }
-                      className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateGrade') ? 'hidden' : ''}`}
-                      required={hasQuestion('delegateGrade')}
-                    >
-                      <option value="">{FORM.placeholders.selectGradeRequired}</option>
-                      {gradeOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateGrade')}</label>
+                      <select
+                        value={d.grade}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'grade',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateGrade') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateGrade')}
+                      >
+                        <option value="">{FORM.placeholders.selectGradeRequired}</option>
+                        {gradeOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className={`md:col-span-2 space-y-2 ${!hasCommitteeChoices ? 'hidden' : ''}`}>
                       {Array.from({ length: rules.committeePreferenceCount }, (_, idx) => idx).map((idx) => (
                         <label key={idx} className="block text-white text-sm font-medium">
                           {renderQuestionLabel(`choice${idx + 1}`, `${idx + 1}. Committee Choice`)}
-                        <select
-                          value={
-                            d.committeePreferences[idx]
-                          }
-                          onChange={(e) =>
-                            handleMemberCommitteeChange(
-                              i,
-                              idx,
-                              e.target.value
-                            )
-                          }
-                          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                          required={Boolean(getChoiceQuestion(idx)?.required)}
-                        >
-                          <option value="">
-                            {getChoiceQuestion(idx)?.label || `${idx + 1}. Committee Choice`}
-                          </option>
-                          {committeeOptions.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
+                          <select
+                            value={
+                              d.committeePreferences[idx]
+                            }
+                            onChange={(e) =>
+                              handleMemberCommitteeChange(
+                                i,
+                                idx,
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+                            required={Boolean(getChoiceQuestion(idx)?.required)}
+                          >
+                            <option value="">
+                              {getChoiceQuestion(idx)?.label || `${idx + 1}. Committee Choice`}
                             </option>
-                          ))}
-                        </select>
+                            {committeeOptions.map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </select>
                         </label>
                       ))}
                     </div>
                     <div className={!hasQuestion('delegateEnglishLevel') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEnglishLevel')}</label>
-                    <select
-                      value={d.englishLevel}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'englishLevel',
-                          e.target.value
-                        )
-                      }
-                      className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEnglishLevel') ? 'hidden' : ''}`}
-                      required={hasQuestion('delegateEnglishLevel')}
-                    >
-                      <option value="">{FORM.placeholders.selectEnglishLevel}</option>
-                      {englishOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateEnglishLevel')}</label>
+                      <select
+                        value={d.englishLevel}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'englishLevel',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all ${!hasQuestion('delegateEnglishLevel') ? 'hidden' : ''}`}
+                        required={hasQuestion('delegateEnglishLevel')}
+                      >
+                        <option value="">{FORM.placeholders.selectEnglishLevel}</option>
+                        {englishOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className={!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateDietaryPreferences')}</label>
-                    <select
-                      value={d.dietaryPreferences}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'dietaryPreferences',
-                          e.target.value
-                        )
-                      }
-                      className={`${!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''} w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all`}
-                    >
-                      <option value="">{FORM.messages.selectNone}</option>
-                      {dietaryOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateDietaryPreferences')}</label>
+                      <select
+                        value={d.dietaryPreferences}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'dietaryPreferences',
+                            e.target.value
+                          )
+                        }
+                        className={`${!hasQuestion('delegateDietaryPreferences') ? 'hidden' : ''} w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all`}
+                      >
+                        <option value="">{FORM.messages.selectNone}</option>
+                        {dietaryOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                     <div className={`md:col-span-2 ${!hasQuestion('delegateExperience') ? 'hidden' : ''}`}>
+                    <div className={`md:col-span-2 ${!hasQuestion('delegateExperience') ? 'hidden' : ''}`}>
                       <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateExperience')}</label>
                       <textarea
                         placeholder={questions.delegateExperience}
@@ -1207,8 +1224,8 @@ const ApplicationForm = ({
                         }
                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
                         rows={4}
-                       minLength={getQuestion('delegateMotivationLetter')?.minCharacters || undefined}
-                       required={hasQuestion('delegateMotivationLetter')}
+                        minLength={getQuestion('delegateMotivationLetter')?.minCharacters || undefined}
+                        required={hasQuestion('delegateMotivationLetter')}
                       />
                       {minimumWordsFor('delegateMotivationLetter') > 0 && <p
                         className={`text-sm mt-1 text-left ${
@@ -1217,7 +1234,7 @@ const ApplicationForm = ({
                             : 'text-red-500'
                         }`}
                       >
-                        {minimumWordsFor('delegateMotivationLetter') > 0 && `${getWordCount(d.motivationLetter)} / ${minimumWordsFor('delegateMotivationLetter')} words`}
+                        {`${getWordCount(d.motivationLetter)} / ${minimumWordsFor('delegateMotivationLetter')} words`}
                       </p>}
                     </div>
                     <div className={`md:col-span-2 ${!hasQuestion('delegateReferences') ? 'hidden' : ''}`}>
@@ -1240,21 +1257,21 @@ const ApplicationForm = ({
                       />
                     </div>
                     <div className={`md:col-span-2 ${!hasQuestion('delegateAdditionalInfo') ? 'hidden' : ''}`}>
-                    <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateAdditionalInfo')}</label>
-                    <textarea
-                      aria-label={questions.delegateAdditionalInfo}
-                      placeholder={questions.delegateAdditionalInfo}
-                      value={d.additionalInfo}
-                      onChange={(e) =>
-                        handleDelegateMemberChange(
-                          i,
-                          'additionalInfo',
-                          e.target.value
-                        )
-                      }
-                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
-                      rows={2}
-                    />
+                      <label className="block text-white text-sm font-medium mb-2">{renderQuestionLabel('delegateAdditionalInfo')}</label>
+                      <textarea
+                        aria-label={questions.delegateAdditionalInfo}
+                        placeholder={questions.delegateAdditionalInfo}
+                        value={d.additionalInfo}
+                        onChange={(e) =>
+                          handleDelegateMemberChange(
+                            i,
+                            'additionalInfo',
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white resize-none focus:outline-none focus:ring-2 focus:border-[var(--color-accent)] transition-all"
+                        rows={2}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1274,8 +1291,7 @@ const ApplicationForm = ({
             </div>
           )}
 
-          {(applicationType !== 'delegation' ||
-            formsGenerated) && (
+          {(applicationType !== 'delegation' || formsGenerated) && (
             <div className="text-center">
               <button
                 type="submit"
@@ -1357,13 +1373,13 @@ const ApplicationForm = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                    className={`w-full px-4 py-4 cursor-pointer bg-[var(--color-accent)] text-[var(--background)] font-bold text-xl rounded-xl hover:bg-white transition-all active:scale-95 ${
+                  className={`w-full px-4 py-4 cursor-pointer bg-[var(--color-accent)] text-[var(--background)] font-bold text-xl rounded-xl hover:bg-white transition-all active:scale-95 ${
                     isSubmitting ? 'opacity-70' : ''
                   }`}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
-                        <span className="animate-spin h-5 w-5 border-2 border-[var(--background)] border-t-transparent rounded-full"></span>
+                      <span className="animate-spin h-5 w-5 border-2 border-[var(--background)] border-t-transparent rounded-full"></span>
                       {FORM.labels.verifying}
                     </span>
                   ) : (
