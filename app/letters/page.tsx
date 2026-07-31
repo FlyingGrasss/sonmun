@@ -50,7 +50,7 @@ const Letters = async () => {
             <br />
             <br />
             <span className="text-[var(--color-accent)] font-black">
-              {letter.author || letter.signer || conference.organizer.name}
+              {letter.author || conference.organizer.name}
             </span>
             <br />
             {conference.hashtag}
