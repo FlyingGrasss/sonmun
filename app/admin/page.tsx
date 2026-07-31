@@ -149,7 +149,7 @@ export default async function AdminPage() {
           <form action={createSecretariatAction} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/25 p-6">
             <h2 className="text-2xl font-bold">New Executive Team Member</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <NameAndSlugFields basePath="/secretariat" />
+              <NameAndSlugFields basePath="/exec" />
               <Field label="Role (optional)" name="role" />
               <Field label="Sort Order" name="sortOrder" type="number" />
               <ImageUrlField name="imageUrl" id="secretariat-image-url" required />
