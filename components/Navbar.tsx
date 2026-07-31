@@ -14,7 +14,7 @@ const links: { href: string; label: string; icon: NavigationIconName }[] = [
 const Navbar = ({ brandName, showCommittees, showSecretariat }: { brandName: string; showCommittees: boolean; showSecretariat: boolean }) => {
   const visibleLinks = links.filter((link) =>
     (link.href !== "/committees" || showCommittees) &&
-    (link.href !== "/secretariat" || showSecretariat)
+    (link.href !== "/exec" || showSecretariat)
   );
 
   return (
