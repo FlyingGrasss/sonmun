@@ -47,6 +47,8 @@ Prisma is generated as part of `pnpm build`. After changing `prisma/schema.prism
 
 Before deploying, set the database, Resend, Google Sheets, and admin authentication variables in the hosting provider. Never commit `.env.local`.
 
+Set the Resend sender address from `/admin` under Site Settings. New installations default to `onboarding@resend.dev`; replace it with an address on a domain verified in Resend before production email delivery.
+
 For local application API testing, set `DISABLE_EMAIL_SENDING=true`. The API stores the verification code and logs it locally instead of sending through Resend. Remove the flag or set it to `false` before testing real email delivery or deploying.
 
 After logging in at `/admin`, committees and Executive Team members, conference settings, application availability, form rules, application questions, and the letters page are managed from the same dashboard. Questions can be edited, added, or deleted per application type. The bottom of the Application Questions section also provides ordered, tab-separated Google Sheets headers ready to paste into cell `A1`. The image fields can upload PNG, JPG, WebP, and GIF files up to 10 MB directly to Vercel Blob; set `BLOB_STORE_ID` and `BLOB_READ_WRITE_TOKEN` in `.env.local` and your deployment environment.

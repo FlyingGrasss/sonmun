@@ -33,6 +33,7 @@ export type EditableSettings = {
     year: number;
     hashtag: string;
     siteUrl: string;
+    senderEmail: string;
     keywords: string[];
     locale: string;
     location: {
@@ -87,6 +88,7 @@ export const fallbackSettings: EditableSettings = {
     year: config.conference.year,
     hashtag: config.conference.hashtag,
     siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? config.conference.siteUrl),
+    senderEmail: "onboarding@resend.dev",
     keywords: [...config.conference.keywords],
     locale: config.conference.locale,
     location: { ...config.conference.location },
@@ -162,6 +164,9 @@ function mergeSettings(value: unknown): EditableSettings {
       ...fallbackSettings.conference,
       ...conference,
       siteUrl: normalizeSiteUrl(String(conference.siteUrl ?? fallbackSettings.conference.siteUrl), fallbackSettings.conference.siteUrl),
+      senderEmail: typeof conference.senderEmail === "string" && conference.senderEmail.trim()
+        ? conference.senderEmail.trim()
+        : fallbackSettings.conference.senderEmail,
       location: { ...fallbackSettings.conference.location, ...location },
       organizer: { ...fallbackSettings.conference.organizer, ...organizer },
     } as EditableSettings["conference"],

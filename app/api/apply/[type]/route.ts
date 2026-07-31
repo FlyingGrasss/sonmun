@@ -156,7 +156,7 @@ async function sendVerificationEmail(
   type: string,
   conference: EditableSettings['conference']
 ) {
-  const fromEmail = process.env.RESEND_FROM_EMAIL!;
+  const fromEmail = conference.senderEmail.trim();
   const title = type.charAt(0).toUpperCase() + type.slice(1);
   const emailSubject =
     lang === 'en'

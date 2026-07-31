@@ -168,6 +168,7 @@ export async function saveConferenceSettingsAction(formData: FormData) {
   conference.year = intValue(formData, "year");
   conference.hashtag = stringValue(formData, "hashtag");
   conference.siteUrl = normalizeSiteUrl(stringValue(formData, "siteUrl"), conference.siteUrl);
+  conference.senderEmail = stringValue(formData, "senderEmail").trim() || "onboarding@resend.dev";
   conference.location.city = stringValue(formData, "locationCity");
   conference.location.country = stringValue(formData, "locationCountry");
   conference.organizer.name = stringValue(formData, "organizerName");
