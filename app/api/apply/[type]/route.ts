@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import getMessage from '@/lib/getMessage';
 import { prisma } from '@/lib/prisma';
 import { getSiteSettings, type EditableSettings } from '@/lib/siteSettings';
+import { isDisposableDomain } from '@/lib/disposableEmailDomains';
 
 interface RequestData {
   email: string;
@@ -46,6 +47,20 @@ export async function POST(
     }
     const data: RequestData = await request.json();
     const { email, name, lang = 'en' } = data;
+
+    const emailDomain = email.split('@')[1]?.toLowerCase();
+    if (!emailDomain || isDisposableDomain(emailDomain)) {
+      return NextResponse.json(
+        {
+          message:
+            lang === 'tr'
+              ? 'Geçici veya tek kullanımlık e-posta adresleri kabul edilmiyor. Lütfen gerçek bir e-posta adresi kullanın.'
+              : 'Temporary or disposable email addresses are not accepted. Please use a real email address.',
+        },
+        { status: 400 }
+      );
+    }
+
     const sheetId = getSheetId(type);
 
     const ip = request.headers.get('x-forwarded-for') || 'unknown';

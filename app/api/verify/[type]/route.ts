@@ -6,6 +6,7 @@ import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import getMessage from '@/lib/getMessage';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { DELEGATION_SHARED_FIELDS } from '@/lib/applicationSheetHeaders';
+import { isDisposableDomain } from '@/lib/disposableEmailDomains';
 
 type DelegateMember = {
   fullName?: string;
@@ -91,6 +92,20 @@ export async function POST(
     }
     const data = (await request.json()) as ApplicationPayload;
     const { email, code, lang = 'en', ...formData } = data;
+
+    const emailDomain = email.split('@')[1]?.toLowerCase();
+    if (!emailDomain || isDisposableDomain(emailDomain)) {
+      return NextResponse.json(
+        {
+          message:
+            lang === 'tr'
+              ? 'Geçici veya tek kullanımlık e-posta adresleri kabul edilmiyor. Lütfen gerçek bir e-posta adresi kullanın.'
+              : 'Temporary or disposable email addresses are not accepted. Please use a real email address.',
+        },
+        { status: 400 }
+      );
+    }
+
     const sheetId = getSheetId(type);
 
     if (!sheetId)
