@@ -54,7 +54,8 @@ export const ModelName = {
   VerificationCode: 'VerificationCode',
   Committee: 'Committee',
   SecretariatMember: 'SecretariatMember',
-  ConferenceSettings: 'ConferenceSettings'
+  ConferenceSettings: 'ConferenceSettings',
+  KvkkApplication: 'KvkkApplication'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -127,6 +128,21 @@ export const ConferenceSettingsScalarFieldEnum = {
 } as const
 
 export type ConferenceSettingsScalarFieldEnum = (typeof ConferenceSettingsScalarFieldEnum)[keyof typeof ConferenceSettingsScalarFieldEnum]
+
+
+export const KvkkApplicationScalarFieldEnum = {
+  id: 'id',
+  fullName: 'fullName',
+  identityNumber: 'identityNumber',
+  email: 'email',
+  phone: 'phone',
+  requestDetails: 'requestDetails',
+  applicationDate: 'applicationDate',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type KvkkApplicationScalarFieldEnum = (typeof KvkkApplicationScalarFieldEnum)[keyof typeof KvkkApplicationScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -61,3 +61,8 @@ export type SecretariatMember = Prisma.SecretariatMemberModel
  * 
  */
 export type ConferenceSettings = Prisma.ConferenceSettingsModel
+/**
+ * Model KvkkApplication
+ * 
+ */
+export type KvkkApplication = Prisma.KvkkApplicationModel

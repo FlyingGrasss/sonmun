@@ -400,7 +400,8 @@ export const ModelName = {
   VerificationCode: 'VerificationCode',
   Committee: 'Committee',
   SecretariatMember: 'SecretariatMember',
-  ConferenceSettings: 'ConferenceSettings'
+  ConferenceSettings: 'ConferenceSettings',
+  KvkkApplication: 'KvkkApplication'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "verificationCode" | "committee" | "secretariatMember" | "conferenceSettings"
+    modelProps: "verificationCode" | "committee" | "secretariatMember" | "conferenceSettings" | "kvkkApplication"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -716,6 +717,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KvkkApplication: {
+      payload: Prisma.$KvkkApplicationPayload<ExtArgs>
+      fields: Prisma.KvkkApplicationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KvkkApplicationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KvkkApplicationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        findFirst: {
+          args: Prisma.KvkkApplicationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KvkkApplicationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        findMany: {
+          args: Prisma.KvkkApplicationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>[]
+        }
+        create: {
+          args: Prisma.KvkkApplicationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        createMany: {
+          args: Prisma.KvkkApplicationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KvkkApplicationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>[]
+        }
+        delete: {
+          args: Prisma.KvkkApplicationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        update: {
+          args: Prisma.KvkkApplicationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        deleteMany: {
+          args: Prisma.KvkkApplicationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KvkkApplicationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KvkkApplicationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>[]
+        }
+        upsert: {
+          args: Prisma.KvkkApplicationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KvkkApplicationPayload>
+        }
+        aggregate: {
+          args: Prisma.KvkkApplicationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKvkkApplication>
+        }
+        groupBy: {
+          args: Prisma.KvkkApplicationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KvkkApplicationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KvkkApplicationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KvkkApplicationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -809,6 +884,21 @@ export const ConferenceSettingsScalarFieldEnum = {
 } as const
 
 export type ConferenceSettingsScalarFieldEnum = (typeof ConferenceSettingsScalarFieldEnum)[keyof typeof ConferenceSettingsScalarFieldEnum]
+
+
+export const KvkkApplicationScalarFieldEnum = {
+  id: 'id',
+  fullName: 'fullName',
+  identityNumber: 'identityNumber',
+  email: 'email',
+  phone: 'phone',
+  requestDetails: 'requestDetails',
+  applicationDate: 'applicationDate',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type KvkkApplicationScalarFieldEnum = (typeof KvkkApplicationScalarFieldEnum)[keyof typeof KvkkApplicationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1096,6 +1186,7 @@ export type GlobalOmitConfig = {
   committee?: Prisma.CommitteeOmit
   secretariatMember?: Prisma.SecretariatMemberOmit
   conferenceSettings?: Prisma.ConferenceSettingsOmit
+  kvkkApplication?: Prisma.KvkkApplicationOmit
 }
 
 /* Types for Logging */

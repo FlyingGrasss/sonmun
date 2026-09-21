@@ -4,13 +4,13 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import {
   FORM,
   formatConferenceText,
 } from '@/lib/conference';
 import { questionById, type QuestionDefinition } from '@/lib/questions';
 import type { EditableSettings } from '@/lib/siteSettings';
-import ConsentDocumentModal, { type ConsentDocument } from '@/components/kvkk/ConsentDocumentModal';
 
 // --- Interfaces ---
 interface FormData {
@@ -157,7 +157,6 @@ const ApplicationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [activeConsentDocument, setActiveConsentDocument] = useState<ConsentDocument | null>(null);
 
   // Handle Portal Mounting
   useEffect(() => {
@@ -1322,8 +1321,7 @@ const ApplicationForm = ({
 
           {(applicationType !== 'delegation' || formsGenerated) && (
             <div className="space-y-6">
-              <fieldset className="mx-auto max-w-3xl space-y-3 rounded-xl border border-white/15 bg-white/5 p-4 text-left">
-                <legend className="px-2 text-sm font-semibold text-[var(--color-accent)]">KVKK onayları</legend>
+              <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <input
                     id="explicit-consent"
@@ -1332,17 +1330,14 @@ const ApplicationForm = ({
                     checked={formData.explicitConsent}
                     onChange={() => handleConsentChange('explicitConsent')}
                     required
-                    aria-label="Açık Rıza Onay Metni'ni Okudum ve Onaylıyorum"
+                    aria-label="I have read and agree to the Açık Rıza Onay Metni."
                     className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-accent)]"
                   />
                   <div className="text-sm leading-6 text-white/90">
-                    <button
-                      type="button"
-                      className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white"
-                      onClick={() => setActiveConsentDocument('explicit')}
-                    >
+                    I have read and agree to the{' '}
+                    <Link href="/acik-riza-onay-metni" className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white">
                       Açık Rıza Onay Metni
-                    </button>{"'ni Okudum ve Onaylıyorum"}
+                    </Link>.
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -1353,20 +1348,17 @@ const ApplicationForm = ({
                     checked={formData.kvkkConsent}
                     onChange={() => handleConsentChange('kvkkConsent')}
                     required
-                    aria-label="6698 Sayılı Kişisel Verileri Koruma Kanunu Aydınlatma Metnini Okudum ve Onaylıyorum"
+                    aria-label="I have read and agree to the 6698 Sayılı Kişisel Verileri Koruma Kanunu Aydınlatma Metni."
                     className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-accent)]"
                   />
                   <div className="text-sm leading-6 text-white/90">
-                    <button
-                      type="button"
-                      className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white"
-                      onClick={() => setActiveConsentDocument('disclosure')}
-                    >
+                    I have read and agree to the{' '}
+                    <Link href="/kvkk-aydinlatma-metni" className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white">
                       6698 Sayılı Kişisel Verileri Koruma Kanunu Aydınlatma Metni
-                    </button>{"ni Okudum ve Onaylıyorum"}
+                    </Link>.
                   </div>
                 </div>
-              </fieldset>
+              </div>
 
               <div className="text-center">
                 <button
@@ -1469,12 +1461,6 @@ const ApplicationForm = ({
           document.body
         )}
 
-        {activeConsentDocument && (
-          <ConsentDocumentModal
-            document={activeConsentDocument}
-            onClose={() => setActiveConsentDocument(null)}
-          />
-        )}
       </div>
     </div>
   );
