@@ -9,6 +9,7 @@ const links: { href: string; label: string; icon: NavigationIconName }[] = [
   { href: "/letters", label: COPY.navigation.letters, icon: "letters" },
   { href: "/exec", label: COPY.navigation.exec, icon: "secretariat" },
   { href: "/committees", label: COPY.navigation.committees, icon: "committees" },
+  { href: "/kvkk", label: COPY.navigation.kvkk, icon: "kvkk" },
 ];
 
 const Navbar = ({ brandName, showCommittees, showSecretariat }: { brandName: string; showCommittees: boolean; showSecretariat: boolean }) => {

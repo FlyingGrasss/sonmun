@@ -24,6 +24,12 @@ function checkboxValue(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function revalidateCommitteePaths() {
+  revalidatePath("/committees");
+  revalidatePath("/apply");
+  revalidatePath("/apply/[applicationType]", "page");
+}
+
 export async function loginAction(formData: FormData) {
   const password = stringValue(formData, "password");
 
@@ -57,7 +63,7 @@ export async function createCommitteeAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/committees");
+  revalidateCommitteePaths();
   redirect("/admin");
 }
 
@@ -82,7 +88,7 @@ export async function updateCommitteeAction(id: number, formData: FormData) {
   });
   if (previous?.imageUrl !== imageUrl) await deleteAdminImage(previous?.imageUrl);
 
-  revalidatePath("/committees");
+  revalidateCommitteePaths();
   redirect("/admin");
 }
 
@@ -91,7 +97,7 @@ export async function deleteCommitteeAction(id: number) {
   const committee = await prisma.committee.findUnique({ where: { id }, select: { imageUrl: true } });
   await prisma.committee.delete({ where: { id } });
   await deleteAdminImage(committee?.imageUrl);
-  revalidatePath("/committees");
+  revalidateCommitteePaths();
   redirect("/admin");
 }
 

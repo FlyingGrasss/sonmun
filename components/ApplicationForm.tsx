@@ -10,6 +10,7 @@ import {
 } from '@/lib/conference';
 import { questionById, type QuestionDefinition } from '@/lib/questions';
 import type { EditableSettings } from '@/lib/siteSettings';
+import ConsentDocumentModal, { type ConsentDocument } from '@/components/kvkk/ConsentDocumentModal';
 
 // --- Interfaces ---
 interface FormData {
@@ -41,6 +42,8 @@ interface FormData {
   chairAnswer1?: string;
   chairAnswer2?: string;
   chairAnswer3?: string;
+  explicitConsent: boolean;
+  kvkkConsent: boolean;
 }
 
 const COMMITTEES = FORM.committees;
@@ -74,7 +77,9 @@ const initialFormState: FormData = {
   references: '',
   chairAnswer1: '',
   chairAnswer2: '',
-  chairAnswer3: ''
+  chairAnswer3: '',
+  explicitConsent: false,
+  kvkkConsent: false,
 };
 
 interface DelegateMember {
@@ -97,9 +102,11 @@ interface DelegateMember {
 const ApplicationForm = ({
   applicationType,
   settings,
+  publishedCommitteeNames = [],
 }: {
   applicationType: string;
   settings: EditableSettings;
+  publishedCommitteeNames?: string[];
 }) => {
   const questionDefinitions = settings.questions[applicationType] ?? settings.questions.delegate ?? [];
   const questions = Object.fromEntries(
@@ -150,6 +157,7 @@ const ApplicationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeConsentDocument, setActiveConsentDocument] = useState<ConsentDocument | null>(null);
 
   // Handle Portal Mounting
   useEffect(() => {
@@ -235,6 +243,10 @@ const ApplicationForm = ({
       [name]:
         name === 'numberOfDelegates' ? parseInt(value) || 0 : value
     }));
+  };
+
+  const handleConsentChange = (name: 'explicitConsent' | 'kvkkConsent') => {
+    setFormData((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   const handleCommitteeChange = (index: number, value: string) => {
@@ -343,6 +355,15 @@ const ApplicationForm = ({
     setMainPageMessage({ text: '', isError: false });
     setModalMessage({ text: '', isError: false });
 
+    if (!formData.explicitConsent || !formData.kvkkConsent) {
+      setMainPageMessage({
+        text: 'Başvuruyu göndermeden önce her iki metni de okuyup onaylamanız gerekir.',
+        isError: true,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     for (const question of questionDefinitions) {
       const value = formData.customAnswers[question.id]?.trim() ?? '';
       if (!value) continue;
@@ -397,7 +418,9 @@ const ApplicationForm = ({
     const body = {
       email: formData.email,
       name: name,
-      lang: 'en'
+      lang: 'en',
+      explicitConsent: formData.explicitConsent,
+      kvkkConsent: formData.kvkkConsent,
     };
 
     try {
@@ -460,6 +483,8 @@ const ApplicationForm = ({
         numberOfDelegates: formData.numberOfDelegates,
         delegates: delegates,
         customAnswers: formData.customAnswers,
+        explicitConsent: formData.explicitConsent,
+        kvkkConsent: formData.kvkkConsent,
         code: verificationCode,
         lang: 'en'
       };
@@ -681,7 +706,11 @@ const ApplicationForm = ({
   const getChoiceQuestion = (index: number) => getQuestion(`choice${index + 1}`) ?? getQuestion('choice');
   const hasCommitteeChoices = Array.from({ length: rules.committeePreferenceCount }, (_, index) => getChoiceQuestion(index)).some(Boolean);
   const firstChoiceQuestion = getChoiceQuestion(0);
-  const committeeOptions = firstChoiceQuestion && firstChoiceQuestion.options.length > 0 ? firstChoiceQuestion.options : COMMITTEES;
+  const committeeOptions = publishedCommitteeNames.length > 0
+    ? publishedCommitteeNames
+    : firstChoiceQuestion && firstChoiceQuestion.options.length > 0
+      ? firstChoiceQuestion.options
+      : COMMITTEES;
 
   const renderFieldByQuestion = (question: QuestionDefinition) => {
     const key = question.id;
@@ -1292,42 +1321,90 @@ const ApplicationForm = ({
           )}
 
           {(applicationType !== 'delegation' || formsGenerated) && (
-            <div className="text-center">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`group glassmorphism text-xl max-sm:text-base cursor-pointer items-center transition-all duration-300 justify-center gap-4 max-sm:gap-2 inline-flex backdrop-blur-md rounded-full px-8 py-4 max-sm:px-6 max-sm:py-3 shadow-lg ${
-                  isSubmitting
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
-                }`}
-              >
-                {isSubmitting
-                  ? FORM.labels.submitting
-                  : FORM.labels.submit}
-                <svg
-                  width="24"
-                  height="19"
-                  viewBox="0 0 24 19"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="transition-transform duration-300 group-hover:translate-x-2 max-sm:w-3.75"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M14.7105 0.439344C14.1953 1.02511 14.1953 1.97487 14.7105
-                      2.56064L19.4951 7.99997H1.56946C0.840735 7.99997 0.25
-                      8.67155 0.25 9.49997C0.25 10.3284 0.840735 11 1.56946
-                      11H19.4951L14.7105 16.4392C14.1953 17.0251 14.1953
-                      17.9749 14.7105 18.5606C15.2258 19.1465 16.0614 19.1465
-                      16.5765 18.5606L23.6136 10.5606C24.1288 9.97473 24.1288
-                      9.02509 23.6136 8.43932L16.5765 0.439344C16.0614
-                      -0.146448 15.2258 -0.146448 14.7105 0.439344Z"
-                    className="fill-white group-hover:fill-[var(--color-accent)] transition-colors duration-300"
+            <div className="space-y-6">
+              <fieldset className="mx-auto max-w-3xl space-y-3 rounded-xl border border-white/15 bg-white/5 p-4 text-left">
+                <legend className="px-2 text-sm font-semibold text-[var(--color-accent)]">KVKK onayları</legend>
+                <div className="flex items-start gap-3">
+                  <input
+                    id="explicit-consent"
+                    name="explicitConsent"
+                    type="checkbox"
+                    checked={formData.explicitConsent}
+                    onChange={() => handleConsentChange('explicitConsent')}
+                    required
+                    aria-label="Açık Rıza Onay Metni'ni Okudum ve Onaylıyorum"
+                    className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-accent)]"
                   />
-                </svg>
-              </button>
+                  <div className="text-sm leading-6 text-white/90">
+                    <button
+                      type="button"
+                      className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white"
+                      onClick={() => setActiveConsentDocument('explicit')}
+                    >
+                      Açık Rıza Onay Metni
+                    </button>{"'ni Okudum ve Onaylıyorum"}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <input
+                    id="kvkk-consent"
+                    name="kvkkConsent"
+                    type="checkbox"
+                    checked={formData.kvkkConsent}
+                    onChange={() => handleConsentChange('kvkkConsent')}
+                    required
+                    aria-label="6698 Sayılı Kişisel Verileri Koruma Kanunu Aydınlatma Metnini Okudum ve Onaylıyorum"
+                    className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-accent)]"
+                  />
+                  <div className="text-sm leading-6 text-white/90">
+                    <button
+                      type="button"
+                      className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-white"
+                      onClick={() => setActiveConsentDocument('disclosure')}
+                    >
+                      6698 Sayılı Kişisel Verileri Koruma Kanunu Aydınlatma Metni
+                    </button>{"ni Okudum ve Onaylıyorum"}
+                  </div>
+                </div>
+              </fieldset>
+
+              <div className="text-center">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`group glassmorphism text-xl max-sm:text-base cursor-pointer items-center transition-all duration-300 justify-center gap-4 max-sm:gap-2 inline-flex backdrop-blur-md rounded-full px-8 py-4 max-sm:px-6 max-sm:py-3 shadow-lg ${
+                    isSubmitting
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                  }`}
+                >
+                  {isSubmitting
+                    ? FORM.labels.submitting
+                    : FORM.labels.submit}
+                  <svg
+                    width="24"
+                    height="19"
+                    viewBox="0 0 24 19"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-300 group-hover:translate-x-2 max-sm:w-3.75"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M14.7105 0.439344C14.1953 1.02511 14.1953 1.97487 14.7105
+                        2.56064L19.4951 7.99997H1.56946C0.840735 7.99997 0.25
+                        8.67155 0.25 9.49997C0.25 10.3284 0.840735 11 1.56946
+                        11H19.4951L14.7105 16.4392C14.1953 17.0251 14.1953
+                        17.9749 14.7105 18.5606C15.2258 19.1465 16.0614 19.1465
+                        16.5765 18.5606L23.6136 10.5606C24.1288 9.97473 24.1288
+                        9.02509 23.6136 8.43932L16.5765 0.439344C16.0614
+                        -0.146448 15.2258 -0.146448 14.7105 0.439344Z"
+                      className="fill-white group-hover:fill-[var(--color-accent)] transition-colors duration-300"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </form>
@@ -1390,6 +1467,13 @@ const ApplicationForm = ({
             </div>
           </div>,
           document.body
+        )}
+
+        {activeConsentDocument && (
+          <ConsentDocumentModal
+            document={activeConsentDocument}
+            onClose={() => setActiveConsentDocument(null)}
+          />
         )}
       </div>
     </div>

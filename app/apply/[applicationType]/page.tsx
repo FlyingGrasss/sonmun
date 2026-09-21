@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import ApplicationForm from '@/components/ApplicationForm';
 import { APPLICATIONS } from '@/lib/conference';
 import { getSiteSettings } from '@/lib/siteSettings';
+import { getPublishedCommittees } from '@/lib/content';
 
 // Static generation definition (Server-side)
 export async function generateStaticParams() {
@@ -24,6 +25,7 @@ export default async function Page({ params }: PageProps) {
   // Await the params before accessing properties
   const { applicationType } = await params;
   const settings = await getSiteSettings();
+  const publishedCommittees = await getPublishedCommittees();
 
   // Double check valid types
   const validTypes = settings.applications.filter((application) => application.enabled).map(
@@ -34,5 +36,11 @@ export default async function Page({ params }: PageProps) {
   }
 
   // Render the Client Component
-  return <ApplicationForm applicationType={applicationType} settings={settings} />;
+  return (
+    <ApplicationForm
+      applicationType={applicationType}
+      settings={settings}
+      publishedCommitteeNames={publishedCommittees.map((committee) => committee.name)}
+    />
+  );
 }

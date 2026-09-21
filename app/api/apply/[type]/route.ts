@@ -10,6 +10,8 @@ interface RequestData {
   email: string;
   name: string;
   lang?: 'en' | 'tr';
+  explicitConsent?: boolean;
+  kvkkConsent?: boolean;
 }
 
 const disableEmailSending = process.env.DISABLE_EMAIL_SENDING === 'true';
@@ -47,6 +49,13 @@ export async function POST(
     }
     const data: RequestData = await request.json();
     const { email, name, lang = 'en' } = data;
+
+    if (data.explicitConsent !== true || data.kvkkConsent !== true) {
+      return NextResponse.json(
+        { message: 'Başvuruyu göndermek için Açık Rıza Onay Metni ve KVKK Aydınlatma Metni onayları zorunludur.' },
+        { status: 400 }
+      );
+    }
 
     const emailDomain = email.split('@')[1]?.toLowerCase();
     if (!emailDomain || isDisposableDomain(emailDomain)) {

@@ -1,4 +1,4 @@
-export type NavigationIconName = "home" | "letters" | "secretariat" | "committees" | "apply";
+export type NavigationIconName = "home" | "letters" | "secretariat" | "committees" | "apply" | "kvkk";
 
 export default function NavigationIcon({
   name,
@@ -33,6 +33,10 @@ export default function NavigationIcon({
 
   if (name === "committees") {
     return <svg {...common}><path d="M10.1 2.182a10 10 0 0 1 3.8 0" /><path d="M13.9 21.818a10 10 0 0 1-3.8 0" /><path d="M17.609 3.72a10 10 0 0 1 2.69 2.7" /><path d="M2.182 13.9a10 10 0 0 1 0-3.8" /><path d="M20.28 17.61a10 10 0 0 1-2.7 2.69" /><path d="M21.818 10.1a10 10 0 0 1 0 3.8" /><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69" /><path d="m6.163 21.117-2.906.85a1 1 0 0 1-1.236-1.169l.965-2.98" /></svg>;
+  }
+
+  if (name === "kvkk") {
+    return <svg {...common}><path d="M12 3 5 6v5c0 4.6 2.9 8.4 7 10 4.1-1.6 7-5.4 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></svg>;
   }
 
   return <svg {...common}><path d="M20 6 9 17l-5-5" /></svg>;

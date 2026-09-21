@@ -30,6 +30,8 @@ type ApplicationPayload = {
   email: string;
   code: string;
   lang?: 'en' | 'tr';
+  explicitConsent?: boolean;
+  kvkkConsent?: boolean;
   fullName?: string;
   phoneNumber?: string;
   nationalId?: string;
@@ -53,6 +55,8 @@ type ApplicationPayload = {
   numberOfDelegates?: number;
   delegates?: DelegateMember[];
 };
+
+type SheetValue = string | number | boolean | undefined;
 
 const googleAuth = new auth.GoogleAuth({
   credentials: JSON.parse(
@@ -92,6 +96,13 @@ export async function POST(
     }
     const data = (await request.json()) as ApplicationPayload;
     const { email, code, lang = 'en', ...formData } = data;
+
+    if (data.explicitConsent !== true || data.kvkkConsent !== true) {
+      return NextResponse.json(
+        { message: 'Başvuruyu doğrulamak için Açık Rıza Onay Metni ve KVKK Aydınlatma Metni onayları zorunludur.' },
+        { status: 400 }
+      );
+    }
 
     const emailDomain = email.split('@')[1]?.toLowerCase();
     if (!emailDomain || isDisposableDomain(emailDomain)) {
@@ -135,8 +146,8 @@ export async function POST(
     const questionDefinitions = settings.questions[type] ?? [];
     const questionIds = new Set(questionDefinitions.map((question) => question.id));
     const addOrderedValues = (
-      row: (string | number | undefined)[],
-      values: Record<string, string | number | undefined>,
+      row: SheetValue[],
+      values: Record<string, SheetValue>,
       skip = new Set<string>()
     ) => {
       for (const question of questionDefinitions) {
@@ -155,8 +166,8 @@ export async function POST(
       delegationSharedFields.flatMap(({ summaryId, delegateId }) => [summaryId, delegateId])
     );
     const addDelegationValues = (
-      row: (string | number | undefined)[],
-      values: Record<string, string | number | undefined>,
+      row: SheetValue[],
+      values: Record<string, SheetValue>,
       side: 'summary' | 'delegate'
     ) => {
       for (const { summaryId, delegateId } of delegationSharedFields) {
@@ -164,12 +175,12 @@ export async function POST(
       }
       addOrderedValues(row, values, delegationSharedIds);
     };
-    const mainValues: Record<string, string | number | undefined> = {
+    const mainValues: Record<string, SheetValue> = {
       ...Object.fromEntries(Object.entries(formData).filter(([key]) => key !== 'customAnswers')),
       email,
       ...(formData.customAnswers ?? {}),
     };
-    const mainQuestionValues: Record<string, string | number | undefined> = {
+    const mainQuestionValues: Record<string, SheetValue> = {
       ...mainValues,
       schoolName: formData.school,
       contactEmail: email,
@@ -178,7 +189,7 @@ export async function POST(
       choice3: formData.committeePreferences?.[2],
     };
     const wordCount = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
-    const validateQuestionLimit = (question: typeof questionDefinitions[number], value: string | number | undefined) => {
+    const validateQuestionLimit = (question: typeof questionDefinitions[number], value: SheetValue) => {
       const text = String(value ?? '').trim();
       if (!text) return null;
       const minimumWords = question.minWords > 0
@@ -196,7 +207,7 @@ export async function POST(
       const error = validateQuestionLimit(question, mainQuestionValues[question.id]);
       if (error) return NextResponse.json({ error }, { status: 400 });
     }
-    const delegateValues = (delegate: DelegateMember): Record<string, string | number | undefined> => ({
+    const delegateValues = (delegate: DelegateMember): Record<string, SheetValue> => ({
       delegateFullName: delegate.fullName,
       delegateBirthDate: delegate.birthDate,
       delegateNationalId: delegate.nationalId,
@@ -214,14 +225,16 @@ export async function POST(
       delegateReferences: delegate.references,
       delegateAdditionalInfo: delegate.additionalInfo,
     });
-    let values: (string | number | undefined)[][] = [];
+    let values: SheetValue[][] = [];
 
     if (type === 'delegation') {
-      const summary: (string | number | undefined)[] = [];
+      const summary: SheetValue[] = [];
       addDelegationValues(summary, {
         schoolName: formData.school,
         numberOfDelegates: formData.numberOfDelegates,
         contactEmail: email,
+        explicitConsent: data.explicitConsent,
+        kvkkConsent: data.kvkkConsent,
         ...(formData.customAnswers ?? {}),
       }, 'summary');
       values.push(summary);
@@ -233,13 +246,13 @@ export async function POST(
           }
         }
         formData.delegates.forEach((delegate) => {
-          const row: (string | number | undefined)[] = [];
+          const row: SheetValue[] = [];
           addDelegationValues(row, delegateValues(delegate), 'delegate');
           values.push(row);
         });
       }
     } else {
-      const row: (string | number | undefined)[] = [];
+      const row: SheetValue[] = [];
       if (questionIds.has('choice1')) {
         mainValues.choice1 = formData.committeePreferences?.[0];
         mainValues.choice2 = formData.committeePreferences?.[1];
