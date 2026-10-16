@@ -171,7 +171,13 @@ function mergeSettings(value: unknown): EditableSettings {
         ? conference.senderEmail.trim()
         : fallbackSettings.conference.senderEmail,
       location: { ...fallbackSettings.conference.location, ...location },
-      organizer: { ...fallbackSettings.conference.organizer, ...organizer },
+      organizer: {
+        ...fallbackSettings.conference.organizer,
+        ...organizer,
+        creditUrl: typeof organizer.creditUrl === "string" && organizer.creditUrl.trim() && organizer.creditUrl.trim().replace(/\/+$/, "") !== "https://emre-bozkurt.vercel.app"
+          ? organizer.creditUrl.trim()
+          : fallbackSettings.conference.organizer.creditUrl,
+      },
     } as EditableSettings["conference"],
     applications: applications.map((application) => ({
       ...fallbackSettings.applications.find((item) => item.id === application.id),
