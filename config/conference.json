@@ -290,6 +290,10 @@
     "home": {
       "applyButton": "Apply Now"
     },
+    "applicationsClosed": {
+      "title": "Our Application Process Is Finished",
+      "message": "Thank You For Your Interest"
+    },
     "pages": {
       "applyTitle": "Apply Now",
       "applicationFormLink": "Application Form",

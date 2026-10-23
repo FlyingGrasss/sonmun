@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedCommittees, getPublishedSecretariat } from "@/lib/content";
-import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
+import { getSiteSettings, isApplicationsClosed, normalizeSiteUrl } from "@/lib/siteSettings";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [settings, committees, secretariat] = await Promise.all([
@@ -62,13 +62,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     },
-    ...settings.applications
-      .filter((application) => application.enabled)
-      .map((application) => ({
-        url: `${siteUrl}/apply/${application.id}`,
-        lastModified: currentDate,
-        changeFrequency: "weekly" as const,
-        priority: 0.8,
-      })),
+    ...(isApplicationsClosed(settings)
+      ? []
+      : settings.applications
+          .filter((application) => application.enabled)
+          .map((application) => ({
+            url: `${siteUrl}/apply/${application.id}`,
+            lastModified: currentDate,
+            changeFrequency: "weekly" as const,
+            priority: 0.8,
+          }))),
   ];
 }

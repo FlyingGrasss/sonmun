@@ -123,6 +123,7 @@ export type SecretariatMemberScalarFieldEnum = (typeof SecretariatMemberScalarFi
 export const ConferenceSettingsScalarFieldEnum = {
   id: 'id',
   data: 'data',
+  applicationsClosed: 'applicationsClosed',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

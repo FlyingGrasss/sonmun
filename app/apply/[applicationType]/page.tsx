@@ -2,8 +2,9 @@
 
 import { notFound } from 'next/navigation';
 import ApplicationForm from '@/components/ApplicationForm';
+import ApplicationsClosedMessage from '@/components/ApplicationsClosedMessage';
 import { APPLICATIONS } from '@/lib/conference';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { getSiteSettings, isApplicationsClosed } from '@/lib/siteSettings';
 import { getPublishedCommittees } from '@/lib/content';
 
 // Static generation definition (Server-side)
@@ -25,6 +26,7 @@ export default async function Page({ params }: PageProps) {
   // Await the params before accessing properties
   const { applicationType } = await params;
   const settings = await getSiteSettings();
+  if (isApplicationsClosed(settings)) return <ApplicationsClosedMessage />;
   const publishedCommittees = await getPublishedCommittees();
 
   // Double check valid types

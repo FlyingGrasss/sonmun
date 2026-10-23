@@ -48,6 +48,7 @@ export type EditableSettings = {
     };
   };
   applications: EditableApplication[];
+  applicationsClosed: boolean;
   form: {
     minimumDelegates: number;
     committeePreferenceCount: number;
@@ -96,6 +97,7 @@ export const fallbackSettings: EditableSettings = {
     organizer: { ...config.conference.organizer },
   },
   applications: config.applications.map((application) => ({ ...application })),
+  applicationsClosed: false,
   form: {
     minimumDelegates: config.form.minimumDelegates,
     committeePreferenceCount: config.form.committeePreferenceCount,
@@ -183,6 +185,7 @@ function mergeSettings(value: unknown): EditableSettings {
       ...fallbackSettings.applications.find((item) => item.id === application.id),
       ...application,
     })) as EditableApplication[],
+    applicationsClosed: fallbackSettings.applicationsClosed,
     form: {
       ...fallbackSettings.form,
       ...form,
@@ -205,10 +208,17 @@ function mergeSettings(value: unknown): EditableSettings {
   };
 }
 
+export function isApplicationsClosed(settings: Pick<EditableSettings, "applicationsClosed">) {
+  return settings.applicationsClosed
+    || (process.env.NODE_ENV === "development" && process.env.APPLICATIONS_CLOSED_PREVIEW === "true");
+}
+
 export const getSiteSettings = cache(async (): Promise<EditableSettings> => {
   try {
     const saved = await prisma.conferenceSettings.findUnique({ where: { id: 1 } });
-    return saved ? mergeSettings(saved.data) : fallbackSettings;
+    return saved
+      ? { ...mergeSettings(saved.data), applicationsClosed: saved.applicationsClosed }
+      : fallbackSettings;
   } catch (error) {
     console.error("[settings] Falling back to conference.json:", error);
     return fallbackSettings;

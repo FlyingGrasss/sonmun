@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import getMessage from '@/lib/getMessage';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { getSiteSettings, isApplicationsClosed } from '@/lib/siteSettings';
 import { DELEGATION_SHARED_FIELDS } from '@/lib/applicationSheetHeaders';
 import { isDisposableDomain } from '@/lib/disposableEmailDomains';
 
@@ -91,6 +91,9 @@ export async function POST(
   try {
     const { type } = await params;
     const settings = await getSiteSettings();
+    if (isApplicationsClosed(settings)) {
+      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
+    }
     if (!settings.applications.some((application) => application.id === type && application.enabled)) {
       return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
     }

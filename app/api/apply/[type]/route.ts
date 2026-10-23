@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import getMessage from '@/lib/getMessage';
 import { prisma } from '@/lib/prisma';
-import { getSiteSettings, type EditableSettings } from '@/lib/siteSettings';
+import { getSiteSettings, isApplicationsClosed, type EditableSettings } from '@/lib/siteSettings';
 import { isDisposableDomain } from '@/lib/disposableEmailDomains';
 
 interface RequestData {
@@ -44,6 +44,9 @@ export async function POST(
   try {
     const { type } = await params;
     const settings = await getSiteSettings();
+    if (isApplicationsClosed(settings)) {
+      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
+    }
     if (!settings.applications.some((application) => application.id === type && application.enabled)) {
       return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
     }

@@ -49,10 +49,11 @@ model SecretariatMember {
 }
 
 model ConferenceSettings {
-  id        Int      @id @default(1)
-  data      Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int      @id @default(1)
+  data               Json
+  applicationsClosed Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model KvkkApplication {

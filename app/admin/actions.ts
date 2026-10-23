@@ -182,6 +182,7 @@ export async function saveConferenceSettingsAction(formData: FormData) {
 
   settings.pages.committeesEnabled = checkboxValue(formData, "committeesEnabled");
   settings.pages.secretariatEnabled = checkboxValue(formData, "secretariatEnabled");
+  const applicationsClosed = checkboxValue(formData, "applicationsClosed");
 
   for (const application of settings.applications) {
     application.enabled = checkboxValue(formData, `application_${application.id}_enabled`);
@@ -228,15 +229,19 @@ export async function saveConferenceSettingsAction(formData: FormData) {
     };
   });
 
+  const settingsData = { ...settings };
+  delete (settingsData as { applicationsClosed?: boolean }).applicationsClosed;
+
   await prisma.conferenceSettings.upsert({
     where: { id: 1 },
-    create: { id: 1, data: settings },
-    update: { data: settings },
+    create: { id: 1, data: settingsData, applicationsClosed },
+    update: { data: settingsData, applicationsClosed },
   });
 
   revalidatePath("/", "layout");
   revalidatePath("/letters");
   revalidatePath("/apply");
+  revalidatePath("/apply/[applicationType]", "page");
   revalidatePath("/sitemap.xml");
   revalidatePath("/robots.txt");
   revalidatePath("/committees");

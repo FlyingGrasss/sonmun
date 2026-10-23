@@ -2,7 +2,7 @@
 
 import type { Metadata } from 'next';
 import { COPY, formatConferenceText } from '@/lib/conference';
-import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
+import { getSiteSettings, isApplicationsClosed, normalizeSiteUrl } from '@/lib/siteSettings';
 
 type Props = {
   params: Promise<{ applicationType: string }>
@@ -13,7 +13,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const settings = await getSiteSettings();
   const application = settings.applications.find((item) => item.id === applicationType);
   const type = application?.title ?? applicationType;
-  
+
+  if (isApplicationsClosed(settings)) {
+    return {
+      title: 'Applications Closed',
+      description: COPY.applicationsClosed.message,
+      alternates: { canonical: `/apply/${applicationType}` },
+    };
+  }
+
   return {
     title: `Apply - ${type}`,
     description: formatConferenceText(COPY.metadata.applicationDescription, {

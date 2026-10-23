@@ -36,12 +36,14 @@ export type ConferenceSettingsSumAggregateOutputType = {
 
 export type ConferenceSettingsMinAggregateOutputType = {
   id: number | null
+  applicationsClosed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type ConferenceSettingsMaxAggregateOutputType = {
   id: number | null
+  applicationsClosed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -49,6 +51,7 @@ export type ConferenceSettingsMaxAggregateOutputType = {
 export type ConferenceSettingsCountAggregateOutputType = {
   id: number
   data: number
+  applicationsClosed: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -65,12 +68,14 @@ export type ConferenceSettingsSumAggregateInputType = {
 
 export type ConferenceSettingsMinAggregateInputType = {
   id?: true
+  applicationsClosed?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type ConferenceSettingsMaxAggregateInputType = {
   id?: true
+  applicationsClosed?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -78,6 +83,7 @@ export type ConferenceSettingsMaxAggregateInputType = {
 export type ConferenceSettingsCountAggregateInputType = {
   id?: true
   data?: true
+  applicationsClosed?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +178,7 @@ export type ConferenceSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensio
 export type ConferenceSettingsGroupByOutputType = {
   id: number
   data: runtime.JsonValue
+  applicationsClosed: boolean
   createdAt: Date
   updatedAt: Date
   _count: ConferenceSettingsCountAggregateOutputType | null
@@ -202,6 +209,7 @@ export type ConferenceSettingsWhereInput = {
   NOT?: Prisma.ConferenceSettingsWhereInput | Prisma.ConferenceSettingsWhereInput[]
   id?: Prisma.IntFilter<"ConferenceSettings"> | number
   data?: Prisma.JsonFilter<"ConferenceSettings">
+  applicationsClosed?: Prisma.BoolFilter<"ConferenceSettings"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ConferenceSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConferenceSettings"> | Date | string
 }
@@ -209,6 +217,7 @@ export type ConferenceSettingsWhereInput = {
 export type ConferenceSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   data?: Prisma.SortOrder
+  applicationsClosed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -219,6 +228,7 @@ export type ConferenceSettingsWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ConferenceSettingsWhereInput[]
   NOT?: Prisma.ConferenceSettingsWhereInput | Prisma.ConferenceSettingsWhereInput[]
   data?: Prisma.JsonFilter<"ConferenceSettings">
+  applicationsClosed?: Prisma.BoolFilter<"ConferenceSettings"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ConferenceSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConferenceSettings"> | Date | string
 }, "id">
@@ -226,6 +236,7 @@ export type ConferenceSettingsWhereUniqueInput = Prisma.AtLeast<{
 export type ConferenceSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   data?: Prisma.SortOrder
+  applicationsClosed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConferenceSettingsCountOrderByAggregateInput
@@ -241,6 +252,7 @@ export type ConferenceSettingsScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ConferenceSettingsScalarWhereWithAggregatesInput | Prisma.ConferenceSettingsScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"ConferenceSettings"> | number
   data?: Prisma.JsonWithAggregatesFilter<"ConferenceSettings">
+  applicationsClosed?: Prisma.BoolWithAggregatesFilter<"ConferenceSettings"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConferenceSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ConferenceSettings"> | Date | string
 }
@@ -248,6 +260,7 @@ export type ConferenceSettingsScalarWhereWithAggregatesInput = {
 export type ConferenceSettingsCreateInput = {
   id?: number
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -255,6 +268,7 @@ export type ConferenceSettingsCreateInput = {
 export type ConferenceSettingsUncheckedCreateInput = {
   id?: number
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -262,6 +276,7 @@ export type ConferenceSettingsUncheckedCreateInput = {
 export type ConferenceSettingsUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -269,6 +284,7 @@ export type ConferenceSettingsUpdateInput = {
 export type ConferenceSettingsUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -276,6 +292,7 @@ export type ConferenceSettingsUncheckedUpdateInput = {
 export type ConferenceSettingsCreateManyInput = {
   id?: number
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -283,6 +300,7 @@ export type ConferenceSettingsCreateManyInput = {
 export type ConferenceSettingsUpdateManyMutationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -290,6 +308,7 @@ export type ConferenceSettingsUpdateManyMutationInput = {
 export type ConferenceSettingsUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  applicationsClosed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -297,6 +316,7 @@ export type ConferenceSettingsUncheckedUpdateManyInput = {
 export type ConferenceSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   data?: Prisma.SortOrder
+  applicationsClosed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -307,12 +327,14 @@ export type ConferenceSettingsAvgOrderByAggregateInput = {
 
 export type ConferenceSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  applicationsClosed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ConferenceSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  applicationsClosed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -326,6 +348,7 @@ export type ConferenceSettingsSumOrderByAggregateInput = {
 export type ConferenceSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   data?: boolean
+  applicationsClosed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["conferenceSettings"]>
@@ -333,6 +356,7 @@ export type ConferenceSettingsSelect<ExtArgs extends runtime.Types.Extensions.In
 export type ConferenceSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   data?: boolean
+  applicationsClosed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["conferenceSettings"]>
@@ -340,6 +364,7 @@ export type ConferenceSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.
 export type ConferenceSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   data?: boolean
+  applicationsClosed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["conferenceSettings"]>
@@ -347,11 +372,12 @@ export type ConferenceSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.
 export type ConferenceSettingsSelectScalar = {
   id?: boolean
   data?: boolean
+  applicationsClosed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConferenceSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["conferenceSettings"]>
+export type ConferenceSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "data" | "applicationsClosed" | "createdAt" | "updatedAt", ExtArgs["result"]["conferenceSettings"]>
 
 export type $ConferenceSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ConferenceSettings"
@@ -359,6 +385,7 @@ export type $ConferenceSettingsPayload<ExtArgs extends runtime.Types.Extensions.
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     data: runtime.JsonValue
+    applicationsClosed: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["conferenceSettings"]>
@@ -786,6 +813,7 @@ export interface Prisma__ConferenceSettingsClient<T, Null = never, ExtArgs exten
 export interface ConferenceSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"ConferenceSettings", 'Int'>
   readonly data: Prisma.FieldRef<"ConferenceSettings", 'Json'>
+  readonly applicationsClosed: Prisma.FieldRef<"ConferenceSettings", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ConferenceSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ConferenceSettings", 'DateTime'>
 }

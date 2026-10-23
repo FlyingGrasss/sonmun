@@ -3,14 +3,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Camera, ClipboardCheck, Globe2, Landmark, Star, type LucideIcon } from 'lucide-react';
+import ApplicationsClosedMessage from '@/components/ApplicationsClosedMessage';
 import { COPY, formatConferenceText } from '@/lib/conference';
-import { getSiteSettings, normalizeSiteUrl } from '@/lib/siteSettings';
+import { getSiteSettings, isApplicationsClosed, normalizeSiteUrl } from '@/lib/siteSettings';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { conference } = await getSiteSettings();
+  const settings = await getSiteSettings();
+  const { conference } = settings;
+  const applicationsClosed = isApplicationsClosed(settings);
   return {
-    title: 'Apply',
-    description: formatConferenceText(COPY.metadata.applyDescription, { shortName: conference.shortName }),
+    title: applicationsClosed ? 'Applications Closed' : 'Apply',
+    description: applicationsClosed
+      ? COPY.applicationsClosed.message
+      : formatConferenceText(COPY.metadata.applyDescription, { shortName: conference.shortName }),
     alternates: { canonical: '/apply' },
     openGraph: { url: `${normalizeSiteUrl(conference.siteUrl)}/apply` },
   };
@@ -49,6 +54,7 @@ function ApplicationIcon({ type }: { type: string }) {
 
 const Apply = async () => {
   const settings = await getSiteSettings();
+  if (isApplicationsClosed(settings)) return <ApplicationsClosedMessage />;
   const applications = APPLICATION_ORDER
     .map((id) => settings.applications.find((application) => application.id === id))
     .filter((application) => application?.enabled);
