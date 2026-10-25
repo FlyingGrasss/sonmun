@@ -5,8 +5,9 @@ import ImageUrlField from "@/components/admin/ImageUrlField";
 import NameAndSlugFields from "@/components/admin/NameAndSlugFields";
 import { CONFERENCE } from "@/lib/conference";
 import { requireAdmin } from "@/lib/adminAuth";
+import { getDelegationAccessToken } from "@/lib/delegationAccess";
 import { prisma } from "@/lib/prisma";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { getSiteSettings, normalizeSiteUrl } from "@/lib/siteSettings";
 
 export const metadata = {
   title: `Admin | ${CONFERENCE.shortName}`,
@@ -69,6 +70,11 @@ export default async function AdminPage() {
     prisma.secretariatMember.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
     getSiteSettings(),
   ]);
+
+  const delegationAccessToken = getDelegationAccessToken();
+  const delegationAccessUrl = delegationAccessToken
+    ? `${normalizeSiteUrl(settings.conference.siteUrl)}/apply/delegation?access=${delegationAccessToken}`
+    : null;
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-10 text-white">
@@ -170,6 +176,20 @@ export default async function AdminPage() {
           <div>
             <h2 className="text-3xl font-bold">Site Settings</h2>
             <p className="mt-2 text-sm text-white/65">Conference content, applications, letters, visibility, and form rules are managed here alongside committees and the Executive Team.</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/25 p-6">
+            <h3 className="text-xl font-bold">Delegation access link</h3>
+            <p className="mt-2 text-sm text-white/65">While applications are closed, this link opens only the delegation form. Keep it private and share it only with delegation applicants.</p>
+            {delegationAccessUrl ? (
+              <input
+                readOnly
+                value={delegationAccessUrl}
+                aria-label="Delegation access link"
+                className="mt-4 w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm text-white"
+              />
+            ) : (
+              <p className="mt-4 text-sm text-[var(--color-accent)]">Set DELEGATION_ACCESS_TOKEN to enable this link.</p>
+            )}
           </div>
           <AdminSettingsForm settings={settings} action={saveConferenceSettingsAction} />
         </section>

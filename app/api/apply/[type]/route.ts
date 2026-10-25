@@ -1,6 +1,7 @@
 import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { canAccessDelegationApplication } from '@/lib/delegationAccess';
 import getMessage from '@/lib/getMessage';
 import { prisma } from '@/lib/prisma';
 import { getSiteSettings, isApplicationsClosed, type EditableSettings } from '@/lib/siteSettings';
@@ -12,6 +13,7 @@ interface RequestData {
   lang?: 'en' | 'tr';
   explicitConsent?: boolean;
   kvkkConsent?: boolean;
+  accessToken?: string;
 }
 
 const disableEmailSending = process.env.DISABLE_EMAIL_SENDING === 'true';
@@ -44,13 +46,13 @@ export async function POST(
   try {
     const { type } = await params;
     const settings = await getSiteSettings();
-    if (isApplicationsClosed(settings)) {
-      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
-    }
     if (!settings.applications.some((application) => application.id === type && application.enabled)) {
       return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
     }
     const data: RequestData = await request.json();
+    if (isApplicationsClosed(settings) && !canAccessDelegationApplication(type, data.accessToken)) {
+      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
+    }
     const { email, name, lang = 'en' } = data;
 
     if (data.explicitConsent !== true || data.kvkkConsent !== true) {

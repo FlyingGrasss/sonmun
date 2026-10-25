@@ -103,10 +103,12 @@ const ApplicationForm = ({
   applicationType,
   settings,
   publishedCommitteeNames = [],
+  accessToken,
 }: {
   applicationType: string;
   settings: EditableSettings;
   publishedCommitteeNames?: string[];
+  accessToken?: string;
 }) => {
   const questionDefinitions = settings.questions[applicationType] ?? settings.questions.delegate ?? [];
   const questions = Object.fromEntries(
@@ -420,6 +422,7 @@ const ApplicationForm = ({
       lang: 'en',
       explicitConsent: formData.explicitConsent,
       kvkkConsent: formData.kvkkConsent,
+      ...(applicationType === 'delegation' && accessToken ? { accessToken } : {}),
     };
 
     try {
@@ -485,7 +488,8 @@ const ApplicationForm = ({
         explicitConsent: formData.explicitConsent,
         kvkkConsent: formData.kvkkConsent,
         code: verificationCode,
-        lang: 'en'
+        lang: 'en',
+        ...(accessToken ? { accessToken } : {}),
       };
     }
 

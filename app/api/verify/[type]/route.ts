@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { auth, sheets } from 'googleapis/build/src/apis/sheets/index.js';
+import { canAccessDelegationApplication } from '@/lib/delegationAccess';
 import getMessage from '@/lib/getMessage';
 import { getSiteSettings, isApplicationsClosed } from '@/lib/siteSettings';
 import { DELEGATION_SHARED_FIELDS } from '@/lib/applicationSheetHeaders';
@@ -30,6 +31,7 @@ type ApplicationPayload = {
   email: string;
   code: string;
   lang?: 'en' | 'tr';
+  accessToken?: string;
   explicitConsent?: boolean;
   kvkkConsent?: boolean;
   fullName?: string;
@@ -91,13 +93,13 @@ export async function POST(
   try {
     const { type } = await params;
     const settings = await getSiteSettings();
-    if (isApplicationsClosed(settings)) {
-      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
-    }
     if (!settings.applications.some((application) => application.id === type && application.enabled)) {
       return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
     }
     const data = (await request.json()) as ApplicationPayload;
+    if (isApplicationsClosed(settings) && !canAccessDelegationApplication(type, data.accessToken)) {
+      return NextResponse.json({ error: 'Applications are currently closed.' }, { status: 403 });
+    }
     const { email, code, lang = 'en', ...formData } = data;
 
     if (data.explicitConsent !== true || data.kvkkConsent !== true) {
