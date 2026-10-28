@@ -119,7 +119,12 @@ export default function Modal({
             <X className="h-5 w-5" />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
+        <div
+          data-lenis-prevent
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6"
+        >
+          {children}
+        </div>
         {footer && <footer className="border-t border-white/10 px-5 py-4 sm:px-6">{footer}</footer>}
       </div>
     </dialog>
