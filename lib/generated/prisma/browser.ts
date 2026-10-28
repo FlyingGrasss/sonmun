@@ -42,3 +42,18 @@ export type ConferenceSettings = Prisma.ConferenceSettingsModel
  * 
  */
 export type KvkkApplication = Prisma.KvkkApplicationModel
+/**
+ * Model Application
+ * 
+ */
+export type Application = Prisma.ApplicationModel
+/**
+ * Model EmailTemplate
+ * 
+ */
+export type EmailTemplate = Prisma.EmailTemplateModel
+/**
+ * Model ApplicationEmailLog
+ * 
+ */
+export type ApplicationEmailLog = Prisma.ApplicationEmailLogModel

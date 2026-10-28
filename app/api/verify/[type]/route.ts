@@ -8,6 +8,10 @@ import getMessage from '@/lib/getMessage';
 import { getSiteSettings, isApplicationsClosed } from '@/lib/siteSettings';
 import { DELEGATION_SHARED_FIELDS } from '@/lib/applicationSheetHeaders';
 import { isDisposableDomain } from '@/lib/disposableEmailDomains';
+import { buildDelegationAnswers, buildIndividualAnswers } from '@/lib/applications/answers';
+import { applicationContentHash, applicationSourceKey } from '@/lib/applications/keys';
+import { upsertApplicationFromSubmission } from '@/lib/applications/records';
+import { isApplicationType, normalizeEmail } from '@/lib/applications/validation';
 
 type DelegateMember = {
   fullName?: string;
@@ -92,6 +96,9 @@ export async function POST(
 ) {
   try {
     const { type } = await params;
+    if (!isApplicationType(type)) {
+      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    }
     const settings = await getSiteSettings();
     if (!settings.applications.some((application) => application.id === type && application.enabled)) {
       return NextResponse.json({ error: 'This application is currently closed.' }, { status: 404 });
@@ -272,6 +279,48 @@ export async function POST(
       values = [row];
     }
 
+    const storedEmail = normalizeEmail(email);
+    const isDelegation = type === 'delegation';
+    const fullName = String(
+      (isDelegation ? formData.school : formData.fullName) ?? ''
+    ).trim() || storedEmail.split('@')[0];
+    const phone = isDelegation ? null : String(formData.phoneNumber ?? '').trim() || null;
+    const school = String(formData.school ?? '').trim() || null;
+    const answers = isDelegation
+      ? buildDelegationAnswers(
+          questionDefinitions,
+          {
+            schoolName: formData.school,
+            numberOfDelegates: formData.numberOfDelegates,
+            contactEmail: email,
+            ...(formData.customAnswers ?? {}),
+          },
+          Array.isArray(formData.delegates) ? formData.delegates.map(delegateValues) : [],
+          settings.form
+        )
+      : buildIndividualAnswers(questionDefinitions, mainQuestionValues, settings.form);
+    const sourceKey = applicationSourceKey(type, { email: storedEmail, school });
+    const sourceHash = applicationContentHash({ fullName, email: storedEmail, phone, school, answers });
+
+    try {
+      const existing = await prisma.application.findUnique({
+        where: { sourceKey },
+        select: { id: true },
+      });
+      if (existing) {
+        await prisma.verificationCode.deleteMany({ where: { email } });
+        return NextResponse.json(
+          { message: getMessage(lang, 'verification_successful') },
+          { status: 200 }
+        );
+      }
+    } catch (error) {
+      console.error('[applications:verify-existing]', {
+        type,
+        code: (error as { code?: string }).code,
+      });
+    }
+
     const sheetsClient = sheets({ version: 'v4', auth: googleAuth });
     await sheetsClient.spreadsheets.values.append({
       spreadsheetId: sheetId,
@@ -279,6 +328,25 @@ export async function POST(
       valueInputOption: 'RAW',
       requestBody: { values }
     });
+
+    try {
+      await upsertApplicationFromSubmission({
+        sourceKey,
+        sourceHash,
+        applicationType: type,
+        fullName,
+        email: storedEmail,
+        phone,
+        school,
+        answers,
+        appliedAt: new Date(),
+      });
+    } catch (error) {
+      console.error('[applications:verify-upsert]', {
+        type,
+        code: (error as { code?: string }).code,
+      });
+    }
 
     await prisma.verificationCode.deleteMany({
       where: { email },

@@ -7,7 +7,12 @@ const COOKIE_NAME = `${CONFERENCE.id}_admin`;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12;
 
 function getSecret() {
-  return process.env.AUTH_SECRET ?? `${CONFERENCE.id}-dev-only-auth-secret`;
+  const secret = process.env.AUTH_SECRET?.trim();
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET must be set in production.");
+  }
+  return `${CONFERENCE.id}-dev-only-auth-secret`;
 }
 
 function sign(value: string) {

@@ -69,3 +69,56 @@ model KvkkApplication {
 
   @@index([email, createdAt])
 }
+
+model Application {
+  id              String   @id @default(cuid())
+  sourceKey       String   @unique
+  sourceHash      String?
+  applicationType String
+  fullName        String
+  email           String
+  phone           String?
+  school          String?
+  status          String   @default("pending")
+  givenCommittee  String?
+  allocation      String?
+  notes           String?  @db.Text
+  answers         Json?
+  appliedAt       DateTime?
+  lastEmailSentAt DateTime?
+  lastEmailStatus String?
+  statusEmailSent Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  emailLogs       ApplicationEmailLog[]
+
+  @@index([applicationType, status])
+  @@index([status, appliedAt])
+  @@index([email])
+  @@index([appliedAt])
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  statusKey String   @unique
+  subject   String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApplicationEmailLog {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  templateKey   String?
+  recipient     String
+  subject       String
+  status        String      @default("sent")
+  resendId      String?     @unique
+  error         String?     @db.Text
+  sentAt        DateTime    @default(now())
+
+  @@index([applicationId, sentAt])
+  @@index([sentAt])
+}

@@ -28,6 +28,26 @@ After logging in at `/admin`, administrators can:
 
 Conference settings are stored in the `ConferenceSettings` database table. If the table is unavailable, the site falls back to `config/conference.json`. Application questions are ordered arrays of explicit question objects with an `id`, label, type, required flag, placeholder, and dropdown options. In the admin panel, edit the visible question text directly, choose the answer type, enter dropdown options one per line, use the arrows to set order, and delete or add rows as needed. The generated Google Sheets header below each application group follows that same order. The required Muhteşem Yüzyıl rating appears after selecting `FKK: Muhteşem Yüzyıl` in delegate and chair applications.
 
+## Applications & Mail Center
+
+Open `/admin/applications` from the admin dashboard. The page stores applications in the database and keeps the Google Sheets append flow intact:
+
+- **Import existing applications.** "Sync sheets" reads the five Google Sheets with the existing read-only service account, one application type at a time. Rows are matched by a stable source key, so re-running a sync is safe. Status, committee, allocation, notes, and email history are preserved; only imported fields are refreshed.
+- **Review and decide.** Filter by type, status, email state, or search text. Set a status directly in the table, assign a committee and allocation, and keep internal notes in the detail view.
+- **Send status emails.** The accepted, waitlisted, and denied templates are stored in the `EmailTemplate` table and are editable in the Mail Center. Variables such as `{{name}}`, `{{committee}}`, and `{{dates}}` are replaced per application. Emails use the sender address from Site Settings and are logged in `ApplicationEmailLog`.
+- **Bulk sends.** Select rows or use "Send unsent" to send the current status email to every matching application that has a final status and has not received it yet. Sends are chunked with rate-limit spacing, and failed recipients can be retried.
+- **Custom email.** Send a one-off message from an application detail view. Custom messages are logged but do not change the status-email state.
+- **Export.** The CSV export includes workflow fields and email state; it deliberately excludes full application answers. A UTF-8 BOM keeps Turkish characters readable in spreadsheet tools.
+- **Privacy.** Admin pages are `no-store` and `noindex`, the three new tables have RLS enabled, and the application list does not load full answers until a detail view is opened.
+
+Delegation applications are stored as one application per school/contact email, with the delegate rows nested under `answers.delegates`. The sync warns when the sheet's declared delegate count differs from the number of rows and keeps every row.
+
+Set `DISABLE_EMAIL_SENDING=true` to simulate status and custom sends locally. The Mail Center logs simulated sends without changing the application's last status-email timestamp. `RESEND_SECONDARY_API_KEY` and `RESEND_SECONDARY_FROM` are optional and are used only when the primary Resend account hits a quota or rate limit.
+
+Apply the Prisma migration before deploying the Mail Center. The migration is additive: it creates `Application`, `EmailTemplate`, and `ApplicationEmailLog` and enables RLS. Do not use `prisma migrate reset` against the shared database.
+
+> The live database also contains a pre-existing unused `verification_codes` table that is not in the migration history. `prisma migrate dev` may report drift because of it. Use `prisma migrate deploy` for additive migrations until that table is reconciled; never reset the shared database to clear the warning.
+
 ## Environment variables
 
 Copy `.env.example` to `.env.local` and fill in the values. It documents every variable used by the app without including secrets. `NEXT_PUBLIC_SITE_URL` is the conference URL override; the default is the URL in `conference.json`. Set `GOOGLE_SITE_VERIFICATION` only when Google Search Console gives you a verification token for the deployment.
@@ -74,7 +94,7 @@ Full Name	Email Address	Phone Number	National ID	Birth Date	Gender	School Name	G
 Delegation submissions write one summary row and then one row per delegate. The slash in this header separates the summary-row value from the delegate-row value for columns that share the same position. Paste this single line into `A1`.
 
 ```text
-School or Organization / Delegate Full Name	Number of Delegates / Birth Date	Advisor/Delegation Email / National ID	Gender	1. Committee Choice	2. Committee Choice	3. Committee Choice	English Level	Dietary Preferences	Delegate Email	Delegate Phone	Grade/Level	Previous Experiences	Motivation Letter	Anything you would like to add?
+School or Organization / Delegate Full Name	Number of Delegates / Birth Date	Advisor/Delegation Email / National ID	Gender	1. Committee Choice	2. Committee Choice	3. Committee Choice	English Level	Dietary Preferences	Delegate Email	Delegate Phone	Grade/Level	Previous Experiences	Motivation Letter	References	Anything you would like to add?
 ```
 
 ### Press

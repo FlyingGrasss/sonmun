@@ -55,7 +55,10 @@ export const ModelName = {
   Committee: 'Committee',
   SecretariatMember: 'SecretariatMember',
   ConferenceSettings: 'ConferenceSettings',
-  KvkkApplication: 'KvkkApplication'
+  KvkkApplication: 'KvkkApplication',
+  Application: 'Application',
+  EmailTemplate: 'EmailTemplate',
+  ApplicationEmailLog: 'ApplicationEmailLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -144,6 +147,58 @@ export const KvkkApplicationScalarFieldEnum = {
 } as const
 
 export type KvkkApplicationScalarFieldEnum = (typeof KvkkApplicationScalarFieldEnum)[keyof typeof KvkkApplicationScalarFieldEnum]
+
+
+export const ApplicationScalarFieldEnum = {
+  id: 'id',
+  sourceKey: 'sourceKey',
+  sourceHash: 'sourceHash',
+  applicationType: 'applicationType',
+  fullName: 'fullName',
+  email: 'email',
+  phone: 'phone',
+  school: 'school',
+  status: 'status',
+  givenCommittee: 'givenCommittee',
+  allocation: 'allocation',
+  notes: 'notes',
+  answers: 'answers',
+  appliedAt: 'appliedAt',
+  lastEmailSentAt: 'lastEmailSentAt',
+  lastEmailStatus: 'lastEmailStatus',
+  statusEmailSent: 'statusEmailSent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ApplicationScalarFieldEnum = (typeof ApplicationScalarFieldEnum)[keyof typeof ApplicationScalarFieldEnum]
+
+
+export const EmailTemplateScalarFieldEnum = {
+  id: 'id',
+  statusKey: 'statusKey',
+  subject: 'subject',
+  body: 'body',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailTemplateScalarFieldEnum = (typeof EmailTemplateScalarFieldEnum)[keyof typeof EmailTemplateScalarFieldEnum]
+
+
+export const ApplicationEmailLogScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  templateKey: 'templateKey',
+  recipient: 'recipient',
+  subject: 'subject',
+  status: 'status',
+  resendId: 'resendId',
+  error: 'error',
+  sentAt: 'sentAt'
+} as const
+
+export type ApplicationEmailLogScalarFieldEnum = (typeof ApplicationEmailLogScalarFieldEnum)[keyof typeof ApplicationEmailLogScalarFieldEnum]
 
 
 export const SortOrder = {

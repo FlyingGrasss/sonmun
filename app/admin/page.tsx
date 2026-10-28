@@ -65,11 +65,23 @@ function Textarea({
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [committees, secretariat, settings] = await Promise.all([
+  const [committees, secretariat, settings, applicationCounts] = await Promise.all([
     prisma.committee.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
     prisma.secretariatMember.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
     getSiteSettings(),
+    prisma.application.groupBy({ by: ["status"], _count: { _all: true } }),
   ]);
+
+  const counts = {
+    pending: 0,
+    accepted: 0,
+    waitlisted: 0,
+    denied: 0,
+  };
+  for (const row of applicationCounts) {
+    if (row.status in counts) counts[row.status as keyof typeof counts] = row._count._all;
+  }
+  const totalApplications = Object.values(counts).reduce((sum, count) => sum + count, 0);
 
   const delegationAccessToken = getDelegationAccessToken();
   const delegationAccessUrl = delegationAccessToken
@@ -87,6 +99,12 @@ export default async function AdminPage() {
             <h1 className="text-4xl font-bold">Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/applications"
+              className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]"
+            >
+              Applications
+            </Link>
             <form action={logoutAction}>
               <button className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-[var(--color-accent)]">
                 Logout
@@ -94,6 +112,41 @@ export default async function AdminPage() {
             </form>
           </div>
         </header>
+
+        <section className="rounded-xl border border-white/10 bg-black/25 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                Applications &amp; Mail
+              </p>
+              <h2 className="mt-1 text-2xl font-bold">Mail Center</h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/65">
+                Review applications, assign committees, and send status emails. Import existing
+                submissions from the five Google Sheets whenever you need to refresh the database.
+              </p>
+            </div>
+            <Link
+              href="/admin/applications"
+              className="rounded-lg bg-[var(--color-accent)] px-4 py-3 text-sm font-bold text-[var(--background)] hover:bg-white"
+            >
+              Open Mail Center
+            </Link>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {[
+              { label: "Total", value: totalApplications, className: "text-white" },
+              { label: "Pending", value: counts.pending, className: "text-amber-300" },
+              { label: "Accepted", value: counts.accepted, className: "text-emerald-300" },
+              { label: "Waitlisted", value: counts.waitlisted, className: "text-sky-300" },
+              { label: "Denied", value: counts.denied, className: "text-rose-300" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/45">{item.label}</p>
+                <p className={`mt-1 text-2xl font-bold tabular-nums ${item.className}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-white/10 bg-black/25 p-6">
